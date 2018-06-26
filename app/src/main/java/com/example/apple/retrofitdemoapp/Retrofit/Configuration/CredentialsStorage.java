@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.example.apple.retrofitdemoapp.Helpers.Preferences;
 
+import java.lang.ref.WeakReference;
+
 public class CredentialsStorage {
 
     private String mToken;
@@ -19,7 +21,7 @@ public class CredentialsStorage {
         if (sInstance == null) {
             sInstance = new CredentialsStorage();
         }
-        sInstance.mContext = context;
+        sInstance.mContext = context.getApplicationContext(); //Just to be sure that passed single global application context
         sInstance.mToken = accessToken;
         sInstance.mRefreshToken = refreshToken;
     }
@@ -38,11 +40,15 @@ public class CredentialsStorage {
 
     public void setToken(String accessToken) {
         mToken = accessToken;
-        Preferences.setToken(mContext, accessToken);
+        if (mContext != null) {
+            Preferences.setToken(mContext, accessToken);
+        }
     }
 
     public void setRefreshToken(String refreshToken) {
         mRefreshToken = refreshToken;
-        Preferences.setRefreshToken(mContext, refreshToken);
+        if (mContext != null) {
+            Preferences.setRefreshToken(mContext, refreshToken);
+        }
     }
 }

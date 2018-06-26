@@ -3,6 +3,7 @@ package com.example.apple.retrofitdemoapp.Retrofit.Services;
 import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
 import com.example.apple.retrofitdemoapp.Models.SignUpModel;
 import com.example.apple.retrofitdemoapp.Models.Token;
+import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Models.VerifyCodeModel;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
@@ -15,6 +16,7 @@ import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public class AuthService extends BaseApiService {
@@ -23,7 +25,7 @@ public class AuthService extends BaseApiService {
     public static void token(String userName, String password, final OnRequestComplete<Token> completeCallback) {
         Call<Token> tokenRequest = sServiceInstance.token(ApiConstants.GRANT_TYPE_PASSWORD, userName,
                 password, ApiConstants.CLIENT_ID);
-        //proceedAsync(tokenRequest, completeCallback);
+
         tokenRequest.enqueue(new Callback<Token>() {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
@@ -34,8 +36,7 @@ public class AuthService extends BaseApiService {
                         return;
                     }
 
-                    CredentialsStorage.token = newToken.access_token;
-                    CredentialsStorage.refreshtoken = newToken.refresh_token;
+                    updateAccessToken(newToken);
                     completeCallback.onSuccess(response.body());
                 } else {
                     completeCallback.onFail(response.message());
@@ -50,7 +51,7 @@ public class AuthService extends BaseApiService {
     }
 
     public static String refreshToken(String refreshToken) {
-        Call<Token> tokenRequest = sServiceInstance.refreshToken(ApiConstants.GRANT_TYPE_REFRESH_TOKEN, refreshToken);
+        Call<Token> tokenRequest = sServiceInstance.refreshToken(ApiConstants.GRANT_TYPE_REFRESH_TOKEN, refreshToken, ApiConstants.CLIENT_ID);
         String newAccessToken = null;
         try {
             Response<Token> response = tokenRequest.execute();
@@ -59,16 +60,26 @@ public class AuthService extends BaseApiService {
                 Token newToken = response.body();
                 if (newToken == null) {
                     return "";
+                } else {
+                    newAccessToken = String.format("%s %s", newToken.token_type, newToken.access_token);
+                    updateAccessToken(newToken);
                 }
-
-                newAccessToken = newToken.access_token;
-                CredentialsStorage.token = newToken.access_token;
-                CredentialsStorage.refreshtoken = newToken.refresh_token;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return newAccessToken;
+    }
+
+    public static void userPermissions(OnRequestComplete<UserPermissions> completeCallback) {
+        Call<UserPermissions> permissionRequest = sServiceInstance.userPermissions();
+        proceedAsync(permissionRequest, completeCallback);
+    }
+
+    private static void updateAccessToken(Token token) {
+        CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+        credentialsStorage.setToken(String.format("%s %s", token.token_type, token.access_token));
+        credentialsStorage.setRefreshToken(token.refresh_token);
     }
 
     private interface IAuthService {
@@ -80,12 +91,17 @@ public class AuthService extends BaseApiService {
         @POST(rootPath + "verify-code")
         Call<Void> verifyCode(@Body VerifyCodeModel model);
 
+        @GET(rootPath + "permissions")
+        Call<UserPermissions> userPermissions();
+
         @FormUrlEncoded
         @POST(rootPath + "token")
         Call<Token> token(@Field("grant_type") String grant_type, @Field("username") String userName,
-                         @Field("password") String password, @Field("client_id") String client_id);
+                         @Field("password") String password, @Field("client_id") String clientId);
 
+        @FormUrlEncoded
+        @POST(rootPath + "token")
         Call<Token> refreshToken(@Field("grant_type") String grant_type,
-                                 @Field("refresh_token") String refreshToken);
+                                 @Field("refresh_token") String refreshToken, @Field("client_id") String clientId);
     }
 }

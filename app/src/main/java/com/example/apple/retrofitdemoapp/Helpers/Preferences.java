@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 public class Preferences {
 
     private static final String PREFERENCE_TOKEN = "PREFERENCE_TOKEN";
-    private static final String PREFERENCE_REFRESH_TOKEN = "PREFERENCE_TOKEN";
+    private static final String PREFERENCE_REFRESH_TOKEN = "PREFERENCE_REFRESH_TOKEN";
 
     public static String getToken(Context context) {
         return getValue(context, PREFERENCE_TOKEN, "");

@@ -15,13 +15,19 @@ public class AuthInterceptor implements Interceptor {
     public Response intercept(final Chain chain) throws IOException {
         final Request original = chain.request();
 
+        CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+
         final Response response = chain.proceed(original);
         if (response.code() == HttpCodes.UNAUTHORIZED) {
             //refresh token
-            //TODO get refresh token value
-            String newAccessToken = AuthService.refreshToken(CredentialsStorage.refreshtoken);
+            String refreshToken = credentialsStorage.getRefreshToken();
+            String newAccessToken = AuthService.refreshToken(refreshToken);
+            if (newAccessToken == null) {
+                chain.call().cancel();
+                return response;
+            }
             Request newRequest = original.newBuilder()
-                    .headers(original.headers())
+                    //.headers(original.headers())
                     .header("Authorization", newAccessToken)
                     .method(original.method(), original.body())
                     .build();

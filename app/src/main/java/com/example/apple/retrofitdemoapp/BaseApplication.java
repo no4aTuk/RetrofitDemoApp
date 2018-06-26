@@ -18,7 +18,7 @@ public class BaseApplication extends Application {
         //Configure api
         ApiConfiguration.setupInstance(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
                 getAppLanguage(), ApiConstants.APP_TYPE);
-        initAppCredentials();
+        initUserCredentials();
     }
 
     private String getAppLanguage() {
@@ -32,8 +32,9 @@ public class BaseApplication extends Application {
         }
     }
 
-    private void initAppCredentials() {
-        CredentialsStorage.token = Preferences.getToken(getApplicationContext());
-        CredentialsStorage.refreshtoken = Preferences.getRefreshToken(getApplicationContext());
+    private void initUserCredentials() {
+        String token = Preferences.getToken(getApplicationContext());
+        String refreshToken = Preferences.getRefreshToken(getApplicationContext());
+        CredentialsStorage.setupInstance(getApplicationContext(), token, refreshToken);
     }
 }

@@ -18,12 +18,16 @@ public class HeadersInterceptor implements Interceptor {
         Request original = chain.request();
 
         ApiConfiguration configuration = ApiConfiguration.getInstance();
+        CredentialsStorage credStorage = CredentialsStorage.getInstance();
+        if (credStorage.getToken() == null) {
+            return chain.proceed(original);
+        }
 
         Request request = original.newBuilder()
                 .header("Accept", "application/json")
                 .header("Accept-Language", configuration.getLanguage())
                 .header("AppType", configuration.getAppType())
-                .header("Authorization", CredentialsStorage.token)
+                .header("Authorization",  credStorage.getToken())
                 .method(original.method(), original.body())
                 .build();
 
