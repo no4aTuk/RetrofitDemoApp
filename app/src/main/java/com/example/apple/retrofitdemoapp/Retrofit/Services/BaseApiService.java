@@ -61,7 +61,7 @@ public class BaseApiService {
             jsonString = errorBody.string();
             BackendError backendError = new Gson().fromJson(jsonString, BackendError.class);
             return backendError.getErrorMessage();
-        } catch (IllegalStateException ilse) {
+        } catch (com.google.gson.JsonSyntaxException ilse) {
             ilse.printStackTrace();
         }  catch (IOException e) {
             e.printStackTrace();
