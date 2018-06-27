@@ -1,10 +1,10 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services;
 
 import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
-import com.example.apple.retrofitdemoapp.Models.SignUpModel;
+import com.example.apple.retrofitdemoapp.Models.SignUp;
 import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
-import com.example.apple.retrofitdemoapp.Models.VerifyCodeModel;
+import com.example.apple.retrofitdemoapp.Models.VerifyCode;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 
@@ -39,7 +39,7 @@ public class AuthService extends BaseApiService {
                     updateAccessToken(newToken);
                     completeCallback.onSuccess(response.body());
                 } else {
-                    completeCallback.onFail(response.message());
+                    completeCallback.onFail(getServerError(response.errorBody()));
                 }
             }
 
@@ -86,10 +86,10 @@ public class AuthService extends BaseApiService {
         String rootPath = "v1/auth/";
 
         @POST(rootPath + "signup")
-        Call<Void> signUp(@Body SignUpModel model);
+        Call<Void> signUp(@Body SignUp model);
 
         @POST(rootPath + "verify-code")
-        Call<Void> verifyCode(@Body VerifyCodeModel model);
+        Call<Void> verifyCode(@Body VerifyCode model);
 
         @GET(rootPath + "permissions")
         Call<UserPermissions> userPermissions();

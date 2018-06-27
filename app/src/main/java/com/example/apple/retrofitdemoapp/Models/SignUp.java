@@ -1,6 +1,6 @@
 package com.example.apple.retrofitdemoapp.Models;
 
-public final class SignUpModel {
+public final class SignUp {
     public String Password;
     public String ConfirmPassword;
     public String VerifyEmailUrl;

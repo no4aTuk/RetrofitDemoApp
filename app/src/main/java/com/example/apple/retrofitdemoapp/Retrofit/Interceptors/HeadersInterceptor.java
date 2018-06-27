@@ -2,6 +2,7 @@ package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
 import android.util.Log;
 
+import com.example.apple.retrofitdemoapp.Helpers.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 
@@ -24,23 +25,13 @@ public class HeadersInterceptor implements Interceptor {
         }
 
         Request request = original.newBuilder()
-                .header("Accept", "application/json")
-                .header("Accept-Language", configuration.getLanguage())
-                .header("AppType", configuration.getAppType())
-                .header("Authorization",  credStorage.getToken())
+                .header(HttpHeaders.Accept.toString(), "application/json")
+                .header(HttpHeaders.AcceptLanguage.toString(), configuration.getLanguage())
+                .header(HttpHeaders.AppType.toString(), configuration.getAppType())
+                .header(HttpHeaders.Authorization.toString(),  credStorage.getToken())
                 .method(original.method(), original.body())
                 .build();
 
-        long t1 = System.nanoTime();
-        Log.d("#INTERCEPTOR", String.format("Sending request %s on %s%n%s",
-                request.url(), chain.connection(), request.headers()));
-
-        Response response = chain.proceed(request);
-
-        long t2 = System.nanoTime();
-        Log.d("#INTERCEPTOR", String.format("Received response for %s in %.1fms%n%s",
-                response.request().url(), (t2 - t1) / 1e6d, response.headers()));
-
-        return response;
+        return chain.proceed(request);
     }
 }

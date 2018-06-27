@@ -27,9 +27,7 @@ public class AuthInterceptor implements Interceptor {
                 return response;
             }
             Request newRequest = original.newBuilder()
-                    //.headers(original.headers())
                     .header("Authorization", newAccessToken)
-                    .method(original.method(), original.body())
                     .build();
             return chain.proceed(newRequest);
         }
