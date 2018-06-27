@@ -150,5 +150,20 @@ public class MainActivity extends AppCompatActivity {
 //                int a = 0;
 //            }
 //        });
+
+        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
+        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
+        String fileExt = "jpg";
+        FileService.downloadFile(fileId2, fileExt, null, new OnRequestComplete<File>() {
+            @Override
+            public void onSuccess(File result) {
+                int a = 0;
+            }
+
+            @Override
+            public void onFail(String error) {
+                int a = 0;
+            }
+        });
     }
 }

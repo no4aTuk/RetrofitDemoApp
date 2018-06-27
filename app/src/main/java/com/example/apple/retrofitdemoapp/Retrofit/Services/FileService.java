@@ -3,8 +3,10 @@ package com.example.apple.retrofitdemoapp.Retrofit.Services;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
 
+import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 
@@ -51,73 +53,33 @@ public class FileService extends BaseApiService {
         proceedAsync(uploadRequest, completeCallback);
     }
 
-    public static void downloadFile(final Context context, String fileId, String format, OnRequestComplete<ResponseBody> completeCallback) {
+    public static void downloadFile(final String fileId, final String fileExtension, final String format, final OnRequestComplete<File> completeCallback) {
+        //Check file on disk
+        final boolean isThumbnail = format != null;
+        File cachedFile = FileCacheHelper.getFileFromDisk(fileId, fileExtension, isThumbnail);
+        if (cachedFile != null) {
+            completeCallback.onSuccess(cachedFile);
+            return;
+        }
+
         String fullUrl = rootPath + "v1/file/" + fileId;
         Call<ResponseBody> fileRequest = sServiceInstance.download(fullUrl, format);
         proceedAsync(fileRequest, new OnRequestComplete<ResponseBody>() {
             @Override
             public void onSuccess(ResponseBody result) {
-                //TODO write into disk
-                saveFileToDisk(result, context);
+                //Cache new file
+                File file = FileCacheHelper.saveFileToDisk(result, fileId, fileExtension, isThumbnail);
+                completeCallback.onSuccess(file);
             }
 
             @Override
             public void onFail(String error) {
-
+                completeCallback.onFail(error);
             }
         });
     }
 
-    private static File saveFileToDisk(ResponseBody body, Context context) {
-        try {
-            // todo change the file location/name according to your needs
-            File futureStudioIconFile = new File(context.getExternalFilesDir(null) + File.separator + "doctor.jpeg");
-
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
-
-            try {
-                byte[] fileReader = new byte[4096];
-
-                long fileSize = body.contentLength();
-                long fileSizeDownloaded = 0;
-
-                inputStream = body.byteStream();
-                outputStream = new FileOutputStream(futureStudioIconFile);
-
-                while (true) {
-                    int read = inputStream.read(fileReader);
-
-                    if (read == -1) {
-                        break;
-                    }
-
-                    outputStream.write(fileReader, 0, read);
-
-                    fileSizeDownloaded += read;
-
-                    Log.d("TAG", "file download: " + fileSizeDownloaded + " of " + fileSize);
-                }
-
-                outputStream.flush();
-
-                return futureStudioIconFile;
-            } catch (IOException e) {
-                return null;
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            }
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
+    //TODO DELETE THIS SHIT
     public static String getFileExtension(File file) {
         if (file != null) {
             return android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString().toUpperCase());
@@ -126,6 +88,7 @@ public class FileService extends BaseApiService {
         }
     }
 
+    //TODO DELETE THIS SHIT
     public static String getMimeTypeByExtension(Context context, File file) {
         String extension = getFileExtension(file);
         String mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
