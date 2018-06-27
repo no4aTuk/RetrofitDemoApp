@@ -9,7 +9,7 @@ import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStora
 
 import java.util.Locale;
 
-public class BaseApplication extends Application {
+public class BaseApplication extends Application implements ApiConfiguration.ApiConfigurationListener {
 
     @Override
     public void onCreate() {
@@ -18,6 +18,7 @@ public class BaseApplication extends Application {
         //Configure api
         ApiConfiguration.setupInstance(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
                 getAppLanguage(), ApiConstants.APP_TYPE);
+        ApiConfiguration.getInstance().setListener(this);
         initUserCredentials();
     }
 
@@ -36,5 +37,12 @@ public class BaseApplication extends Application {
         String token = Preferences.getToken(getApplicationContext());
         String refreshToken = Preferences.getRefreshToken(getApplicationContext());
         CredentialsStorage.setupInstance(getApplicationContext(), token, refreshToken);
+    }
+
+    //ApiConfiguration.ApiConfigurationListener
+    @Override
+    public void OnTokenExpired() {
+        //TODO go to login screen
+        int a = 0;
     }
 }

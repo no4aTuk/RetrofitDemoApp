@@ -1,11 +1,18 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
+import java.lang.ref.WeakReference;
+
 public final class ApiConfiguration {
+
+    public interface ApiConfigurationListener {
+        void OnTokenExpired();
+    }
+
     private String mApiURL;
     private String mFileServerURL;
     private String mLanguage;
     private String mAppType;
-
+    private ApiConfigurationListener mListener;
 
     private static ApiConfiguration sInstance;
 
@@ -42,5 +49,13 @@ public final class ApiConfiguration {
 
     public String getAppType() {
         return mAppType;
+    }
+
+    public ApiConfigurationListener getListener() {
+        return mListener;
+    }
+
+    public void setListener(ApiConfigurationListener mListener) {
+        this.mListener = mListener;
     }
 }

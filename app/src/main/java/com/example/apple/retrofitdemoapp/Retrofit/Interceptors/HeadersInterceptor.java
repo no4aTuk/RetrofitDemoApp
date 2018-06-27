@@ -26,7 +26,6 @@ public class HeadersInterceptor implements Interceptor {
 
         Request request = original.newBuilder()
                 .header(HttpHeaders.Accept.toString(), "application/json")
-                //.header("Content-Type", "multipart/form-data")
                 .header(HttpHeaders.AcceptLanguage.toString(), configuration.getLanguage())
                 .header(HttpHeaders.AppType.toString(), configuration.getAppType())
                 .header(HttpHeaders.Authorization.toString(),  credStorage.getToken())

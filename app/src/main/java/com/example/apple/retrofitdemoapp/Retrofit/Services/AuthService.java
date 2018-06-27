@@ -26,26 +26,21 @@ public class AuthService extends BaseApiService {
         Call<Token> tokenRequest = sServiceInstance.token(ApiConstants.GRANT_TYPE_PASSWORD, userName,
                 password, ApiConstants.CLIENT_ID);
 
-        tokenRequest.enqueue(new Callback<Token>() {
+        proceedAsync(tokenRequest, new OnRequestComplete<Token>() {
             @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                if (response.isSuccessful()) {
-                    Token newToken = response.body();
-                    if (newToken == null) {
-                        completeCallback.onFail(null);
-                        return;
-                    }
-
-                    updateAccessToken(newToken);
-                    completeCallback.onSuccess(response.body());
-                } else {
-                    completeCallback.onFail(getServerError(response.errorBody()));
+            public void onSuccess(Token result) {
+                if (result == null) {
+                    completeCallback.onFail(null);
+                    return;
                 }
+
+                updateAccessToken(result);
+                completeCallback.onSuccess(result);
             }
 
             @Override
-            public void onFailure(Call<Token> call, Throwable t) {
-                completeCallback.onFail(t.getLocalizedMessage());
+            public void onFail(String error) {
+                completeCallback.onFail(error);
             }
         });
     }

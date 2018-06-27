@@ -11,11 +11,16 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.example.apple.retrofitdemoapp.Models.Token;
+import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
+import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService;
 
 import java.io.File;
@@ -39,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openGallery();
+                //openGallery();
+                doSomething();
             }
         });
 
@@ -151,19 +157,58 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
-        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
-        String fileExt = "jpg";
-        FileService.downloadFile(fileId2, fileExt, null, new OnRequestComplete<File>() {
+        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
             @Override
-            public void onSuccess(File result) {
-                int a = 0;
+            public void onSuccess(UserPermissions result) {
+
+                Log.d("TOKEN", "onSuccess: BREAK TOKEN");
+                CredentialsStorage.getInstance().setToken("asdads");
+
+                AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+                    @Override
+                    public void onSuccess(UserPermissions result) {
+
+                        Log.d("TOKEN", "onSuccess: ");
+                        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+                            @Override
+                            public void onSuccess(UserPermissions result) {
+                                Log.d("TOKEN", "onSuccess: ");
+                            }
+
+                            @Override
+                            public void onFail(String error) {
+                                Log.d("TOKEN", "onFail: ");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFail(String error) {
+                        Log.d("TOKEN", "onFail: ");
+                    }
+                });
             }
 
             @Override
             public void onFail(String error) {
-                int a = 0;
+                Log.d("TOKEN", "onFail: ");
             }
         });
+
+
+//        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
+//        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
+//        String fileExt = "jpg";
+//        FileService.downloadFile(fileId2, fileExt, null, new OnRequestComplete<File>() {
+//            @Override
+//            public void onSuccess(File result) {
+//                int a = 0;
+//            }
+//
+//            @Override
+//            public void onFail(String error) {
+//                int a = 0;
+//            }
+//        });
     }
 }
