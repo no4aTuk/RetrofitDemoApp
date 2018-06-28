@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.Retrofit.Services;
+package com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
 
 import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
 import com.example.apple.retrofitdemoapp.Models.SignUp;
@@ -7,6 +7,7 @@ import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Models.VerifyCode;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
-public class AuthService extends BaseApiService {
+public final class AuthService extends BaseApiService {
     private static IAuthService sServiceInstance = sRetrofit.create(IAuthService.class);
 
     public static void token(String userName, String password, final OnRequestComplete<Token> completeCallback) {
@@ -75,28 +76,5 @@ public class AuthService extends BaseApiService {
         CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
         credentialsStorage.setToken(String.format("%s %s", token.token_type, token.access_token));
         credentialsStorage.setRefreshToken(token.refresh_token);
-    }
-
-    private interface IAuthService {
-        String rootPath = "v1/auth/";
-
-        @POST(rootPath + "signup")
-        Call<Void> signUp(@Body SignUp model);
-
-        @POST(rootPath + "verify-code")
-        Call<Void> verifyCode(@Body VerifyCode model);
-
-        @GET(rootPath + "permissions")
-        Call<UserPermissions> userPermissions();
-
-        @FormUrlEncoded
-        @POST(rootPath + "token")
-        Call<Token> token(@Field("grant_type") String grant_type, @Field("username") String userName,
-                         @Field("password") String password, @Field("client_id") String clientId);
-
-        @FormUrlEncoded
-        @POST(rootPath + "token")
-        Call<Token> refreshToken(@Field("grant_type") String grant_type,
-                                 @Field("refresh_token") String refreshToken, @Field("client_id") String clientId);
     }
 }

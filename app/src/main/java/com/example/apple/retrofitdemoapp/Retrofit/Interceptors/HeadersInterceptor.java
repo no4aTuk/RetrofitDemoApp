@@ -1,10 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
-import android.util.Log;
-
 import com.example.apple.retrofitdemoapp.Helpers.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
-import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 
 import java.io.IOException;
 
@@ -14,11 +11,11 @@ import okhttp3.Response;
 
 public class HeadersInterceptor implements Interceptor {
 
-    private final ApiConfiguration configuration = ApiConfiguration.getInstance();
-
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
+
+        final ApiConfiguration configuration = ApiConfiguration.getInstance();
 
         Request request = original.newBuilder()
                 .header(HttpHeaders.Accept.toString(), "application/json")

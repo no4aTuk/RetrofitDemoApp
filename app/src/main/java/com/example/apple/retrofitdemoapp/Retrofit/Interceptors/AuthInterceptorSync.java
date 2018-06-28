@@ -1,12 +1,10 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
-import android.util.Log;
-
 import com.example.apple.retrofitdemoapp.Helpers.HttpCodes;
 import com.example.apple.retrofitdemoapp.Helpers.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
-import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
 
 import java.io.IOException;
 

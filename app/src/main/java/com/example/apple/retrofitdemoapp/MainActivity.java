@@ -16,12 +16,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
-import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
-import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
 
 import java.io.File;
 import java.io.IOException;
@@ -157,20 +156,20 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-//        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
-//        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
-//        String fileExt = "jpg";
-//        FileService.downloadFile(MainActivity.this, fileId2, fileExt, null, new OnRequestComplete<File>() {
-//            @Override
-//            public void onSuccess(File result) {
-//                int a = 0;
-//            }
-//
-//            @Override
-//            public void onFail(String error) {
-//                int a = 0;
-//            }
-//        });
+        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
+        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
+        String fileExt = "jpg";
+        FileService.downloadFile(MainActivity.this, fileId, fileExt, null, new OnRequestComplete<File>() {
+            @Override
+            public void onSuccess(File result) {
+                int a = 0;
+            }
+
+            @Override
+            public void onFail(String error) {
+                int a = 0;
+            }
+        });
     }
 
     private void BreakToken() {

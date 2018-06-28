@@ -1,5 +1,7 @@
-package com.example.apple.retrofitdemoapp.Retrofit.Services;
+package com.example.apple.retrofitdemoapp.Retrofit.Services.FileService;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
@@ -9,16 +11,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
+import com.example.apple.retrofitdemoapp.MainActivity;
+import com.example.apple.retrofitdemoapp.R;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -34,11 +41,7 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
-public class FileService extends BaseApiService {
-
-    //[text="a80cd6da-e21e-494a-85a2-d2459a7d076c"] uploaded file 1
-    //[text="acd4f7e8-bf95-471d-875c-2efa21261159"] uploaded file 2
-    //https://futurestud.io/tutorials/retrofit-2-how-to-download-files-from-server
+public final class FileService extends BaseApiService {
 
     private static final IFileService sServiceInstance = sRetrofit.create(IFileService.class);
     private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
@@ -73,16 +76,10 @@ public class FileService extends BaseApiService {
             @Override
             public void onSuccess(final ResponseBody result) {
 
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        //Cache new file
-                        File file = FileCacheHelper.saveFileToDisk(context, result, fileId, fileExtension, isThumbnail);
-                        completeCallback.onSuccess(file);
-
-                        return null;
-                    }
-                }.execute();
+                //Streaming downloads in current Thread leads to NetworkOnMainThread exception so we need to save file in background;
+                FileCacherAsyncTask fileTask = new FileCacherAsyncTask(
+                        context, result, fileId, fileExtension, isThumbnail, completeCallback);
+                fileTask.execute();
             }
 
             @Override
@@ -92,7 +89,7 @@ public class FileService extends BaseApiService {
         });
     }
 
-    //TODO DELETE THIS SHIT
+    //TODO DELETE THIS SHIT LATER
     public static String getFileExtension(File file) {
         if (file != null) {
             return android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString().toUpperCase());
@@ -101,7 +98,7 @@ public class FileService extends BaseApiService {
         }
     }
 
-    //TODO DELETE THIS SHIT
+    //TODO DELETE THIS SHIT LATER
     public static String getMimeTypeByExtension(Context context, File file) {
         String extension = getFileExtension(file);
         String mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
@@ -113,14 +110,35 @@ public class FileService extends BaseApiService {
         return mime != null ? mime : "application/octet-stream";
     }
 
-    private interface IFileService {
+    private static class FileCacherAsyncTask extends AsyncTask<Void, Void, Void> {
 
-        @Multipart
-        @POST
-        Call<ResponseBody> upload(@Url String url, @Part MultipartBody.Part file, @Query("mimeType") String mimeType);
+        private WeakReference<Context> context;
+        private String fileId;
+        private String fileExtension;
+        private boolean isThumbnail;
+        private ResponseBody file;
+        private OnRequestComplete<File> cb;
 
-        @Streaming
-        @GET
-        Call<ResponseBody> download(@Url String url, @Query("format") String format);
+        // only retain a weak reference to the activity
+        FileCacherAsyncTask(final Context context, ResponseBody file, final String fileId, final String fileExtension,
+                            boolean isThumbnail, final OnRequestComplete<File> completeCallback) {
+            this.context = new WeakReference<>(context);
+            this.fileId = fileId;
+            this.fileExtension = fileExtension;
+            this.isThumbnail = isThumbnail;
+            this.file = file;
+            this.cb = completeCallback;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            //Cache new file
+            if (context == null) return null;
+            File file = FileCacheHelper.saveFileToDisk(context.get(), this.file, fileId, fileExtension, isThumbnail);
+            cb.onSuccess(file);
+
+            return null;
+        }
     }
 }
