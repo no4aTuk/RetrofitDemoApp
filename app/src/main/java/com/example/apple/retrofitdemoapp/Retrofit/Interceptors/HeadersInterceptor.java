@@ -14,21 +14,16 @@ import okhttp3.Response;
 
 public class HeadersInterceptor implements Interceptor {
 
+    private final ApiConfiguration configuration = ApiConfiguration.getInstance();
+
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
-
-        ApiConfiguration configuration = ApiConfiguration.getInstance();
-        CredentialsStorage credStorage = CredentialsStorage.getInstance();
-        if (credStorage.getToken() == null) {
-            return chain.proceed(original);
-        }
 
         Request request = original.newBuilder()
                 .header(HttpHeaders.Accept.toString(), "application/json")
                 .header(HttpHeaders.AcceptLanguage.toString(), configuration.getLanguage())
                 .header(HttpHeaders.AppType.toString(), configuration.getAppType())
-                .header(HttpHeaders.Authorization.toString(),  credStorage.getToken())
                 .method(original.method(), original.body())
                 .build();
 

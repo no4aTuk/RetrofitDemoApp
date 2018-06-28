@@ -1,5 +1,6 @@
 package com.example.apple.retrofitdemoapp.Helpers;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -15,13 +16,13 @@ public class FileCacheHelper {
 
     private static final String THUMBNAIL_PREFIX = "thumbnail_";
 
-    public static File saveFileToDisk(ResponseBody body, String fileId, String fileExtension, boolean isThumbnail) {
+    public static File saveFileToDisk(Context context, ResponseBody body, String fileId, String fileExtension, boolean isThumbnail) {
         try {
 
             InputStream inputStream = null;
             OutputStream outputStream = null;
 
-            File file = prepareFileName(fileId, fileExtension, isThumbnail);
+            File file = prepareFileName(context, fileId, fileExtension, isThumbnail, true);
 
             try {
                 byte[] fileReader = new byte[4096];
@@ -59,19 +60,63 @@ public class FileCacheHelper {
         }
     }
 
-    public static File getFileFromDisk(String fileId, String fileExtension, boolean isThumbnail) {
-        File file = prepareFileName(fileId, fileExtension, isThumbnail);
+    public static File getFileFromDisk(Context context, String fileId, String fileExtension, boolean isThumbnail) {
+        File file = prepareFileName(context, fileId, fileExtension, isThumbnail, false);
         return file;
     }
 
-    private static File prepareFileName(String fileId, String fileExtension, boolean isThumbnail) {
+    private static File prepareFileName(Context context, String fileId, String fileExtension, boolean isThumbnail, boolean isSaving) {
+        //Check is external storage available
+        if (isSaving && !isExternalStorageWritable()) {
+            return null;
+        }
+        if (!isSaving && !isExternalStorageReadable()) {
+            return null;
+        }
+
+        File fileFolder;
+        File resultFile;
+
         String fileName = "";
         if (isThumbnail) fileName = THUMBNAIL_PREFIX;
         fileName = String.format("%s%s.%s", fileName, fileId, fileExtension);
 
-        File file = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS + File.separator + fileName);
+        if (isThumbnail) {
+            fileFolder = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        } else {
+            fileFolder = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS);
+        }
+        resultFile = new File(fileFolder.getAbsoluteFile() + File.separator + fileName);
 
-        return file;
+        if (!fileFolder.exists()) {
+            fileFolder.mkdir();
+        }
+        if (!resultFile.exists()) {
+            try {
+                resultFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return resultFile;
+    }
+
+    private static boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
     }
 }

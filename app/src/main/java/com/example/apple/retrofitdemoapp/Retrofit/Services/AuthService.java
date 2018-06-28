@@ -45,25 +45,25 @@ public class AuthService extends BaseApiService {
         });
     }
 
-    public static String refreshToken(String refreshToken) {
+    public static int refreshToken() {
+        String refreshToken = CredentialsStorage.getInstance().getRefreshToken();
         Call<Token> tokenRequest = sServiceInstance.refreshToken(ApiConstants.GRANT_TYPE_REFRESH_TOKEN, refreshToken, ApiConstants.CLIENT_ID);
-        String newAccessToken = null;
+        int statusCode = 0;
         try {
             Response<Token> response = tokenRequest.execute();
             if (response.isSuccessful()) {
 
                 Token newToken = response.body();
-                if (newToken == null) {
-                    return "";
-                } else {
-                    newAccessToken = String.format("%s %s", newToken.token_type, newToken.access_token);
+                if (newToken != null) {
+                    //newAccessToken = String.format("%s %s", newToken.token_type, newToken.access_token);
                     updateAccessToken(newToken);
                 }
             }
+            statusCode = response.code();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return newAccessToken;
+        return statusCode;
     }
 
     public static void userPermissions(OnRequestComplete<UserPermissions> completeCallback) {

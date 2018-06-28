@@ -3,7 +3,11 @@ package com.example.apple.retrofitdemoapp.Retrofit.Services;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
@@ -27,6 +31,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
 public class FileService extends BaseApiService {
@@ -38,7 +43,7 @@ public class FileService extends BaseApiService {
     private static final IFileService sServiceInstance = sRetrofit.create(IFileService.class);
     private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
 
-    public static void uploadFile(File file, String category, Context context, OnRequestComplete<ResponseBody> completeCallback) {
+    public static void uploadFile(Context context, File file, String category, OnRequestComplete<ResponseBody> completeCallback) {
 
         String mimeType = getMimeTypeByExtension(context, file);
         MediaType mediaType = MediaType.parse(mimeType);
@@ -53,10 +58,10 @@ public class FileService extends BaseApiService {
         proceedAsync(uploadRequest, completeCallback);
     }
 
-    public static void downloadFile(final String fileId, final String fileExtension, final String format, final OnRequestComplete<File> completeCallback) {
+    public static void downloadFile(final Context context, final String fileId, final String fileExtension, final String format, final OnRequestComplete<File> completeCallback) {
         //Check file on disk
         final boolean isThumbnail = format != null;
-        File cachedFile = FileCacheHelper.getFileFromDisk(fileId, fileExtension, isThumbnail);
+        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
         if (cachedFile != null) {
             completeCallback.onSuccess(cachedFile);
             return;
@@ -66,10 +71,18 @@ public class FileService extends BaseApiService {
         Call<ResponseBody> fileRequest = sServiceInstance.download(fullUrl, format);
         proceedAsync(fileRequest, new OnRequestComplete<ResponseBody>() {
             @Override
-            public void onSuccess(ResponseBody result) {
-                //Cache new file
-                File file = FileCacheHelper.saveFileToDisk(result, fileId, fileExtension, isThumbnail);
-                completeCallback.onSuccess(file);
+            public void onSuccess(final ResponseBody result) {
+
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        //Cache new file
+                        File file = FileCacheHelper.saveFileToDisk(context, result, fileId, fileExtension, isThumbnail);
+                        completeCallback.onSuccess(file);
+
+                        return null;
+                    }
+                }.execute();
             }
 
             @Override
@@ -106,6 +119,7 @@ public class FileService extends BaseApiService {
         @POST
         Call<ResponseBody> upload(@Url String url, @Part MultipartBody.Part file, @Query("mimeType") String mimeType);
 
+        @Streaming
         @GET
         Call<ResponseBody> download(@Url String url, @Query("format") String format);
     }

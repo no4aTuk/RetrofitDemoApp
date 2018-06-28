@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //openGallery();
-                doSomething();
+                openGallery();
+                //doSomething();
             }
         });
 
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void uploadFile(File file) {
         String category = "image";
-        FileService.uploadFile(file, category, MainActivity.this, new OnRequestComplete<ResponseBody>() {
+        FileService.uploadFile(MainActivity.this, file, category, new OnRequestComplete<ResponseBody>() {
             @Override
             public void onSuccess(ResponseBody result) {
                 int a = 0;
@@ -157,12 +157,77 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
+//        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
+//        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
+//        String fileExt = "jpg";
+//        FileService.downloadFile(MainActivity.this, fileId2, fileExt, null, new OnRequestComplete<File>() {
+//            @Override
+//            public void onSuccess(File result) {
+//                int a = 0;
+//            }
+//
+//            @Override
+//            public void onFail(String error) {
+//                int a = 0;
+//            }
+//        });
+    }
+
+    private void BreakToken() {
         AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
             @Override
             public void onSuccess(UserPermissions result) {
 
                 Log.d("TOKEN", "onSuccess: BREAK TOKEN");
                 CredentialsStorage.getInstance().setToken("asdads");
+
+                AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+                    @Override
+                    public void onSuccess(UserPermissions result) {
+
+                        Log.d("TOKEN", "onSuccess: ");
+                        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+                            @Override
+                            public void onSuccess(UserPermissions result) {
+                                Log.d("TOKEN", "onSuccess: ");
+                            }
+
+                            @Override
+                            public void onFail(String error) {
+                                Log.d("TOKEN", "onFail: ");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFail(String error) {
+                        Log.d("TOKEN", "onFail: ");
+                    }
+                });
+
+                AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+                    @Override
+                    public void onSuccess(UserPermissions result) {
+
+                        Log.d("TOKEN", "onSuccess: ");
+                        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+                            @Override
+                            public void onSuccess(UserPermissions result) {
+                                Log.d("TOKEN", "onSuccess: ");
+                            }
+
+                            @Override
+                            public void onFail(String error) {
+                                Log.d("TOKEN", "onFail: ");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFail(String error) {
+                        Log.d("TOKEN", "onFail: ");
+                    }
+                });
 
                 AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
                     @Override
@@ -194,21 +259,5 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("TOKEN", "onFail: ");
             }
         });
-
-
-//        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
-//        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
-//        String fileExt = "jpg";
-//        FileService.downloadFile(fileId2, fileExt, null, new OnRequestComplete<File>() {
-//            @Override
-//            public void onSuccess(File result) {
-//                int a = 0;
-//            }
-//
-//            @Override
-//            public void onFail(String error) {
-//                int a = 0;
-//            }
-//        });
     }
 }
