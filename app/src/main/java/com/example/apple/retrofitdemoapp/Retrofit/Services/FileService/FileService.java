@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 
 import com.example.apple.retrofitdemoapp.Helpers.FileHelpers.FileCacheHelper;
 import com.example.apple.retrofitdemoapp.Helpers.FileHelpers.ProgressRequestBody;
+import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
@@ -26,26 +27,12 @@ public final class FileService extends BaseApiService {
     private static final IFileService sServiceInstance = sRetrofit.create(IFileService.class);
     private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
 
-    public static OnFileRequestComplete<File> downloadFileListener; //Used by ProgressInterceptor
-
-    public static void uploadFile(Context context, File file, String category, OnRequestComplete<ResponseBody> completeCallback) {
-
-        String mimeType = getMimeTypeByExtension(context, file);
-        MediaType mediaType = MediaType.parse(mimeType);
-        RequestBody requestFile = RequestBody.create(
-                mediaType, file);
-
-        MultipartBody.Part body = MultipartBody.Part.createFormData(category,
-                file.getName(), requestFile);
-
-        String fullUrl = rootPath + "v1/file/save/" + category;
-        Call<ResponseBody> uploadRequest = sServiceInstance.upload(fullUrl, body, mimeType);
-        proceedAsync(uploadRequest, completeCallback);
-    }
+    public static OnFileRequestComplete<File> downloadFileListener; //Used by FileDownloadProgressInterceptor
 
     public static void uploadFileWithProgress(Context context, File file, String category, OnFileRequestComplete<ResponseBody> completeCallback) {
 
         String mimeType = getMimeTypeByExtension(context, file);
+        //Uncomment when do not need to detect upload progress anymore
         //MediaType mediaType = MediaType.parse(mimeType);
         //RequestBody requestFile = RequestBody.create(
         //        mediaType, file);
@@ -57,34 +44,6 @@ public final class FileService extends BaseApiService {
         String fullUrl = rootPath + "v1/file/save/" + category;
         Call<ResponseBody> uploadRequest = sServiceInstance.upload(fullUrl, body, mimeType);
         proceedAsync(uploadRequest, completeCallback);
-    }
-
-    public static void downloadFile(final Context context, final String fileId, final String fileExtension, final String format, final OnRequestComplete<File> completeCallback) {
-        //Check file on disk
-        final boolean isThumbnail = format != null;
-        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
-        if (cachedFile != null) {
-            completeCallback.onSuccess(cachedFile);
-            return;
-        }
-
-        String fullUrl = rootPath + "v1/file/" + fileId;
-        Call<ResponseBody> fileRequest = sServiceInstance.download(fullUrl, format);
-        proceedAsync(fileRequest, new OnRequestComplete<ResponseBody>() {
-            @Override
-            public void onSuccess(final ResponseBody result) {
-
-                //Streaming downloads in current Thread leads to NetworkOnMainThread exception so we need to save file in background;
-                FileCacherAsyncTask fileTask = new FileCacherAsyncTask(
-                        context, result, fileId, fileExtension, isThumbnail, completeCallback);
-                fileTask.execute();
-            }
-
-            @Override
-            public void onFail(String error) {
-                completeCallback.onFail(error);
-            }
-        });
     }
 
     public static void downloadFileWithProgress(final Context context, final String fileId,
@@ -105,7 +64,7 @@ public final class FileService extends BaseApiService {
             @Override
             public void onSuccess(final ResponseBody result) {
 
-                //Streaming downloads in current Thread leads to NetworkOnMainThread exception so we need to save file in background;
+                //@Streaming downloads in current Thread leads to NetworkOnMainThread exception so we need to save file in background;
                 FileCacherAsyncTask fileTask = new FileCacherAsyncTask(
                         context, result, fileId, fileExtension, isThumbnail, completeCallback);
                 fileTask.execute();
@@ -113,7 +72,7 @@ public final class FileService extends BaseApiService {
             }
 
             @Override
-            public void onFail(String error) {
+            public void onFail(ErrorResult error) {
                 completeCallback.onFail(error);
                 FileService.downloadFileListener = null;
             }

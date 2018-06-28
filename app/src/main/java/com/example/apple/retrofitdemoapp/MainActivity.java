@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
@@ -94,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private String getImagePath(Uri uri) {
         String[] projection = { MediaStore.Images.Media.DATA };
 
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //
 //            @Override
-//            public void onFail(String error) {
+//            public void onFail(ErrorResult error) {
 //                int b = 0;
 //            }
 //        });
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFail(String error) {
+            public void onFail(ErrorResult error) {
                 int a = 0;
             }
         });
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFail(String error) {
+            public void onFail(ErrorResult error) {
                 //TODO show error
                 int a = 0;
             }
@@ -202,11 +202,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFail(String error) {
+            public void onFail(ErrorResult error) {
                 int a = 0;
             }
         });
-
     }
 
     private void BreakToken() {
@@ -229,14 +228,14 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onFail(String error) {
+                            public void onFail(ErrorResult error) {
                                 Log.d("TOKEN", "onFail: ");
                             }
                         });
                     }
 
                     @Override
-                    public void onFail(String error) {
+                    public void onFail(ErrorResult error) {
                         Log.d("TOKEN", "onFail: ");
                     }
                 });
@@ -253,14 +252,14 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onFail(String error) {
+                            public void onFail(ErrorResult error) {
                                 Log.d("TOKEN", "onFail: ");
                             }
                         });
                     }
 
                     @Override
-                    public void onFail(String error) {
+                    public void onFail(ErrorResult error) {
                         Log.d("TOKEN", "onFail: ");
                     }
                 });
@@ -277,21 +276,21 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onFail(String error) {
+                            public void onFail(ErrorResult error) {
                                 Log.d("TOKEN", "onFail: ");
                             }
                         });
                     }
 
                     @Override
-                    public void onFail(String error) {
+                    public void onFail(ErrorResult error) {
                         Log.d("TOKEN", "onFail: ");
                     }
                 });
             }
 
             @Override
-            public void onFail(String error) {
+            public void onFail(ErrorResult error) {
                 Log.d("TOKEN", "onFail: ");
             }
         });

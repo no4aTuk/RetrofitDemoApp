@@ -1,6 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
 
 import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
+import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Models.SignUp;
 import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
@@ -40,7 +41,7 @@ public final class AuthService extends BaseApiService {
             }
 
             @Override
-            public void onFail(String error) {
+            public void onFail(ErrorResult error) {
                 completeCallback.onFail(error);
             }
         });
@@ -56,7 +57,6 @@ public final class AuthService extends BaseApiService {
 
                 Token newToken = response.body();
                 if (newToken != null) {
-                    //newAccessToken = String.format("%s %s", newToken.token_type, newToken.access_token);
                     updateAccessToken(newToken);
                 }
             }

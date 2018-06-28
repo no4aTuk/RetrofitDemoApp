@@ -1,8 +1,8 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.AuthInterceptorSync;
+import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.FileDownloadProgressInterceptor;
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.HeadersInterceptor;
-import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.ProgressInterceptor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +34,7 @@ public class RetrofitBuilder {
                 .connectTimeout(10 * 1000, TimeUnit.MILLISECONDS)
                 .addInterceptor(new HeadersInterceptor())
                 .addInterceptor(new AuthInterceptorSync())
-                .addNetworkInterceptor(new ProgressInterceptor())
+                .addNetworkInterceptor(new FileDownloadProgressInterceptor())
                 .build();
 
         return new Retrofit.Builder()
