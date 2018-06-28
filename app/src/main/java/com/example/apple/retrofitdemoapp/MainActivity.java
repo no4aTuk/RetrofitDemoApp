@@ -15,8 +15,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
+import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
+import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button button;
     private ImageView imageView;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +47,12 @@ public class MainActivity extends AppCompatActivity {
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openGallery();
+                //openGallery();
                 //doSomething();
+                getToken();
             }
         });
+        this.progressBar = findViewById(R.id.progressBar);
 
         doSomething();
     }
@@ -129,40 +135,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void uploadFile(File file) {
         String category = "image";
-        FileService.uploadFile(MainActivity.this, file, category, new OnRequestComplete<ResponseBody>() {
-            @Override
-            public void onSuccess(ResponseBody result) {
-                int a = 0;
-            }
-
-            @Override
-            public void onFail(String error) {
-                int b = 0;
-            }
-        });
-    }
-
-    private void doSomething() {
-//        AuthService.token("+79085111864", "Qwerty123", new OnRequestComplete<Token>() {
+//        FileService.uploadFile(MainActivity.this, file, category, new OnRequestComplete<ResponseBody>() {
 //            @Override
-//            public void onSuccess(Token result) {
+//            public void onSuccess(ResponseBody result) {
 //                int a = 0;
 //            }
 //
 //            @Override
 //            public void onFail(String error) {
-//                //TODO show error
-//                int a = 0;
+//                int b = 0;
 //            }
 //        });
-
-        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
-        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
-        String fileExt = "jpg";
-        FileService.downloadFile(MainActivity.this, fileId, fileExt, null, new OnRequestComplete<File>() {
+        FileService.uploadFileWithProgress(MainActivity.this, file, category, new OnFileRequestComplete<ResponseBody>() {
             @Override
-            public void onSuccess(File result) {
-                int a = 0;
+            public void onProgress(int percents) {
+                Log.d("UPLOAD", "onSuccess: " + percents);
+                progressBar.setProgress(percents);
+            }
+
+            @Override
+            public void onSuccess(ResponseBody result) {
+
+                progressBar.setProgress(100);
             }
 
             @Override
@@ -170,6 +164,49 @@ public class MainActivity extends AppCompatActivity {
                 int a = 0;
             }
         });
+    }
+
+    private void getToken() {
+        AuthService.token("+79085111864", "Qwerty123", new OnRequestComplete<Token>() {
+            @Override
+            public void onSuccess(Token result) {
+                int a = 0;
+            }
+
+            @Override
+            public void onFail(String error) {
+                //TODO show error
+                int a = 0;
+            }
+        });
+    }
+
+    private void doSomething() {
+
+
+        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
+        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
+        String fileExt = "jpg";
+        FileService.downloadFileWithProgress(MainActivity.this, fileId, fileExt, null, new OnFileRequestComplete<File>() {
+            @Override
+            public void onProgress(int percents) {
+                Log.d("INTERCEPTOR", "onProgress: " + percents);
+                progressBar.setProgress(percents);
+            }
+
+            @Override
+            public void onSuccess(File result) {
+                Log.d("INTERCEPTOR", "onProgress: complete");
+                int a = 0;
+                progressBar.setProgress(100);
+            }
+
+            @Override
+            public void onFail(String error) {
+                int a = 0;
+            }
+        });
+
     }
 
     private void BreakToken() {

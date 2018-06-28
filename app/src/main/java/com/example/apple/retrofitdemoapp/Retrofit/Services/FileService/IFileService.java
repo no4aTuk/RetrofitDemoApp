@@ -18,9 +18,13 @@ interface IFileService {
     @POST
     Call<ResponseBody> upload(@Url String url, @Part MultipartBody.Part file, @Query("mimeType") String mimeType);
 
+    @Multipart
+    @POST
+    Call<ResponseBody> uploadProgress(@Url String url, @Part MultipartBody.Part file, @Query("mimeType") String mimeType);
+
     @Streaming
     @Headers({
-        "Content-Type: multipart/form-data"
+            "Content-Type: multipart/form-data"
     })
     @GET
     Call<ResponseBody> download(@Url String url, @Query("format") String format);

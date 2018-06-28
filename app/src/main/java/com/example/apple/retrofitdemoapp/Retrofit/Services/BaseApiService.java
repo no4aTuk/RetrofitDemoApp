@@ -19,7 +19,7 @@ import retrofit2.Retrofit;
 
 public class BaseApiService {
 
-    protected static Retrofit sRetrofit = RetrofitBuilder.createInstance();
+    protected static Retrofit sRetrofit = RetrofitBuilder.getsInstance();
 
     protected static <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
         request.enqueue(new Callback<T>() {

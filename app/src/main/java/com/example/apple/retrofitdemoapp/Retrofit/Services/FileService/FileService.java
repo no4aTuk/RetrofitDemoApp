@@ -1,30 +1,18 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services.FileService;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
-import android.widget.TextView;
 
-import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
-import com.example.apple.retrofitdemoapp.MainActivity;
-import com.example.apple.retrofitdemoapp.R;
+import com.example.apple.retrofitdemoapp.Helpers.FileHelpers.FileCacheHelper;
+import com.example.apple.retrofitdemoapp.Helpers.FileHelpers.ProgressRequestBody;
+import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 
 import okhttp3.MediaType;
@@ -32,19 +20,13 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Multipart;
-import retrofit2.http.POST;
-import retrofit2.http.Part;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-import retrofit2.http.Streaming;
-import retrofit2.http.Url;
 
 public final class FileService extends BaseApiService {
 
     private static final IFileService sServiceInstance = sRetrofit.create(IFileService.class);
     private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
+
+    public static OnFileRequestComplete<File> downloadFileListener; //Used by ProgressInterceptor
 
     public static void uploadFile(Context context, File file, String category, OnRequestComplete<ResponseBody> completeCallback) {
 
@@ -52,6 +34,22 @@ public final class FileService extends BaseApiService {
         MediaType mediaType = MediaType.parse(mimeType);
         RequestBody requestFile = RequestBody.create(
                 mediaType, file);
+
+        MultipartBody.Part body = MultipartBody.Part.createFormData(category,
+                file.getName(), requestFile);
+
+        String fullUrl = rootPath + "v1/file/save/" + category;
+        Call<ResponseBody> uploadRequest = sServiceInstance.upload(fullUrl, body, mimeType);
+        proceedAsync(uploadRequest, completeCallback);
+    }
+
+    public static void uploadFileWithProgress(Context context, File file, String category, OnFileRequestComplete<ResponseBody> completeCallback) {
+
+        String mimeType = getMimeTypeByExtension(context, file);
+        //MediaType mediaType = MediaType.parse(mimeType);
+        //RequestBody requestFile = RequestBody.create(
+        //        mediaType, file);
+        ProgressRequestBody requestFile = new ProgressRequestBody(file, mimeType, completeCallback);
 
         MultipartBody.Part body = MultipartBody.Part.createFormData(category,
                 file.getName(), requestFile);
@@ -85,6 +83,39 @@ public final class FileService extends BaseApiService {
             @Override
             public void onFail(String error) {
                 completeCallback.onFail(error);
+            }
+        });
+    }
+
+    public static void downloadFileWithProgress(final Context context, final String fileId,
+                                                final String fileExtension, final String format,
+                                                final OnFileRequestComplete<File> completeCallback) {
+        //Check file on disk
+        final boolean isThumbnail = format != null;
+        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
+        if (cachedFile != null) {
+            completeCallback.onSuccess(cachedFile);
+            return;
+        }
+
+        String fullUrl = rootPath + "v1/file/" + fileId;
+        FileService.downloadFileListener = completeCallback;
+        Call<ResponseBody> fileRequest = sServiceInstance.download(fullUrl, format);
+        proceedAsync(fileRequest, new OnRequestComplete<ResponseBody>() {
+            @Override
+            public void onSuccess(final ResponseBody result) {
+
+                //Streaming downloads in current Thread leads to NetworkOnMainThread exception so we need to save file in background;
+                FileCacherAsyncTask fileTask = new FileCacherAsyncTask(
+                        context, result, fileId, fileExtension, isThumbnail, completeCallback);
+                fileTask.execute();
+                FileService.downloadFileListener = null;
+            }
+
+            @Override
+            public void onFail(String error) {
+                completeCallback.onFail(error);
+                FileService.downloadFileListener = null;
             }
         });
     }
