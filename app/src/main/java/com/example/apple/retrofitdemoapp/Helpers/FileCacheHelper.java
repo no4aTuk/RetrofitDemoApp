@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.Helpers.FileHelpers;
+package com.example.apple.retrofitdemoapp.Helpers;
 
 import android.content.Context;
 import android.os.Environment;

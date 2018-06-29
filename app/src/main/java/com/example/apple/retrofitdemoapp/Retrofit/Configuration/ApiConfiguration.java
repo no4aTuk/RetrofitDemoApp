@@ -1,11 +1,11 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
-import java.lang.ref.WeakReference;
-
 public final class ApiConfiguration {
 
     public interface ApiConfigurationListener {
         void OnTokenExpired();
+        String getLocalizedError(int statusCode);
+        boolean isNetWorkAvailable();
     }
 
     private String mApiURL;

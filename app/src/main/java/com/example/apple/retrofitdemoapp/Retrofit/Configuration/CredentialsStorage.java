@@ -10,7 +10,7 @@ public class CredentialsStorage {
 
     private String mToken;
     private String mRefreshToken;
-    private Context mContext;
+    private WeakReference<Context> mContext;
 
     private CredentialsStorage() {}
 
@@ -21,7 +21,8 @@ public class CredentialsStorage {
         if (sInstance == null) {
             sInstance = new CredentialsStorage();
         }
-        sInstance.mContext = context.getApplicationContext(); //Just to be sure that passed single global application context
+        //Just to be sure that passed single global application context
+        sInstance.mContext = new WeakReference<>(context.getApplicationContext());
         sInstance.mToken = accessToken;
         sInstance.mRefreshToken = refreshToken;
     }
@@ -41,14 +42,14 @@ public class CredentialsStorage {
     public void setToken(String accessToken) {
         mToken = accessToken;
         if (mContext != null) {
-            Preferences.setToken(mContext, accessToken);
+            Preferences.setToken(mContext.get(), accessToken);
         }
     }
 
     public void setRefreshToken(String refreshToken) {
         mRefreshToken = refreshToken;
         if (mContext != null) {
-            Preferences.setRefreshToken(mContext, refreshToken);
+            Preferences.setRefreshToken(mContext.get(), refreshToken);
         }
     }
 }

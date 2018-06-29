@@ -11,11 +11,19 @@ import okhttp3.Response;
 
 public class HeadersInterceptor implements Interceptor {
 
+    private ApiConfiguration configuration = ApiConfiguration.getInstance();
+
+    private HeadersInterceptor() {}
+
+    public HeadersInterceptor(ApiConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
 
-        final ApiConfiguration configuration = ApiConfiguration.getInstance();
+        //final ApiConfiguration configuration = ApiConfiguration.getInstance();
 
         Request request = original.newBuilder()
                 .header(HttpHeaders.Accept.toString(), "application/json")

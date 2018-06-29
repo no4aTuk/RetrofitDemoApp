@@ -1,6 +1,6 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
-import com.example.apple.retrofitdemoapp.Helpers.HttpCodes;
+import com.example.apple.retrofitdemoapp.Helpers.ErrorCodes;
 import com.example.apple.retrofitdemoapp.Helpers.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
@@ -13,10 +13,21 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AuthInterceptorSync implements Interceptor {
+
+    private CredentialsStorage credentialsStorage = null;
+    private ApiConfiguration configuration;
+
+    private AuthInterceptorSync() { }
+
+    public AuthInterceptorSync(CredentialsStorage storage, ApiConfiguration configuration) {
+        this.credentialsStorage = storage;
+        this.configuration = configuration;
+    }
+
     @Override
     public Response intercept(Chain chain) throws IOException {
 
-        CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+        //CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
         String requestToken = credentialsStorage.getToken();
 
         Request request = chain.request();
@@ -28,8 +39,8 @@ public class AuthInterceptorSync implements Interceptor {
         //Perform request
         Response response = chain.proceed(request);
 
-        if (response.code() == HttpCodes.UNAUTHORIZED ||
-                response.code() == HttpCodes.FORBIDDEN) {
+        if (response.code() == ErrorCodes.UNAUTHORIZED ||
+                response.code() == ErrorCodes.FORBIDDEN) {
 
             //Sync block, to avoid multiply token updates
             synchronized (this) {
@@ -54,6 +65,9 @@ public class AuthInterceptorSync implements Interceptor {
                     setAuthHeader(builder, credentialsStorage.getToken());
                     request = builder.build();
                     return chain.proceed(request); //repeat request with new token
+                } else {
+                    //Prevent requests with invalid token
+                    return null;
                 }
             }
         }
@@ -72,7 +86,8 @@ public class AuthInterceptorSync implements Interceptor {
     }
 
     private void logout() {
-        ApiConfiguration configuration = ApiConfiguration.getInstance();
+        if (configuration == null) return;
+
         if (configuration.getListener() != null) {
             configuration.getListener().OnTokenExpired();
         }

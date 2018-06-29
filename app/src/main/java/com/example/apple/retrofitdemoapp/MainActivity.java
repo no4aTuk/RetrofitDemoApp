@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Models.Token;
@@ -55,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         });
         this.progressBar = findViewById(R.id.progressBar);
 
-        doSomething();
+        //doSomething();
+        BreakToken();
     }
 
     @Override
@@ -177,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFail(ErrorResult error) {
                 //TODO show error
                 int a = 0;
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -204,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFail(ErrorResult error) {
                 int a = 0;
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -215,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("TOKEN", "onSuccess: BREAK TOKEN");
                 CredentialsStorage.getInstance().setToken("asdads");
+                //CredentialsStorage.getInstance().setRefreshToken("");
 
                 AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
                     @Override

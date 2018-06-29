@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">RetrofitDemoApp</string>
+    <string name="no_connection_error">Нет подключения к сети</string>
+    <string name="bad_request_error">Бэд реквест</string>
+    <string name="internal_error">500</string>
+    <string name="unknown_error">Неизвестная ошибка сервера</string>
+    <string name="timeout_error">Время ожидания вышло</string>
+    <string name="not_found_error">Время ожидания вышло</string>
 </resources>

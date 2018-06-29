@@ -1,8 +1,11 @@
 package com.example.apple.retrofitdemoapp;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
+import com.example.apple.retrofitdemoapp.Helpers.ApiErrorHelper;
+import com.example.apple.retrofitdemoapp.Helpers.NetworkUtils;
 import com.example.apple.retrofitdemoapp.Helpers.Preferences;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
@@ -39,10 +42,22 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
         CredentialsStorage.setupInstance(getApplicationContext(), token, refreshToken);
     }
 
-    //ApiConfiguration.ApiConfigurationListener
+    //-------------------------------------------
+    // ApiConfiguration.ApiConfigurationListener
+    //-------------------------------------------
     @Override
     public void OnTokenExpired() {
         //TODO go to login screen
-        int a = 0;
+        Log.d("LOGOUT", "OnTokenExpired: ");
+    }
+
+    @Override
+    public String getLocalizedError(int statusCode) {
+        return ApiErrorHelper.getErrorByCode(this, statusCode);
+    }
+
+    @Override
+    public boolean isNetWorkAvailable() {
+        return NetworkUtils.hasInternetConnection(this, true);
     }
 }

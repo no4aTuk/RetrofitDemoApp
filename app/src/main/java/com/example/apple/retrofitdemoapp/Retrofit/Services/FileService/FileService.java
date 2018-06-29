@@ -5,8 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.example.apple.retrofitdemoapp.Helpers.FileHelpers.FileCacheHelper;
-import com.example.apple.retrofitdemoapp.Helpers.FileHelpers.ProgressRequestBody;
+import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
@@ -16,9 +15,7 @@ import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 
@@ -51,11 +48,11 @@ public final class FileService extends BaseApiService {
                                                 final OnFileRequestComplete<File> completeCallback) {
         //Check file on disk
         final boolean isThumbnail = format != null;
-        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
-        if (cachedFile != null) {
-            completeCallback.onSuccess(cachedFile);
-            return;
-        }
+//        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
+//        if (cachedFile != null) {
+//            completeCallback.onSuccess(cachedFile);
+//            return;
+//        }
 
         String fullUrl = rootPath + "v1/file/" + fileId;
         FileService.downloadFileListener = completeCallback;

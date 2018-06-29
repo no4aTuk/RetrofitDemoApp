@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.Helpers.FileHelpers;
+package com.example.apple.retrofitdemoapp.Retrofit.Services.FileService;
 
 import android.os.Handler;
 import android.os.Looper;
