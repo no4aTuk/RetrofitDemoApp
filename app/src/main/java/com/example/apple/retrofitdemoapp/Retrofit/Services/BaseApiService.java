@@ -24,7 +24,7 @@ public class BaseApiService {
 
     protected static Retrofit sRetrofit = RetrofitBuilder.getsInstance(configuration, credentialsStorage);
 
-    protected static <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
+    public static <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
         request.enqueue(new Callback<T>() {
             @Override
             public void onResponse(Call<T> call, Response<T> response) {
@@ -38,7 +38,7 @@ public class BaseApiService {
         });
     }
 
-    protected static <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
+    public static <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
         try {
             Response<T> response = request.execute();
             handleSuccessResult(response, callback);

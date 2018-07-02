@@ -26,6 +26,7 @@ import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
+import com.example.apple.retrofitdemoapp.Retrofit.DispatchGroup;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
 
@@ -53,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openGallery();
+                //openGallery();
+                GroupRequest();
             }
         });
         this.progressBar = findViewById(R.id.progressBar);
@@ -114,6 +116,67 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
 
         return picturePath;
+    }
+
+    private void GroupRequest() {
+        final DispatchGroup group = new DispatchGroup();
+
+
+        group.enter();
+        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+            @Override
+            public void onSuccess(UserPermissions result) {
+
+                Log.d("DISPATCH", "REQUESTS 1 COMPLETE: ");
+                group.leave();
+            }
+
+            @Override
+            public void onFail(ErrorResult error) {
+
+            }
+        });
+
+        group.enter();
+        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+            @Override
+            public void onSuccess(UserPermissions result) {
+                Log.d("DISPATCH", "REQUESTS 2 COMPLETE: ");
+                group.leave();
+            }
+
+            @Override
+            public void onFail(ErrorResult error) {
+
+            }
+        });
+
+        group.enter();
+        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+            @Override
+            public void onSuccess(UserPermissions result) {
+                Log.d("DISPATCH", "REQUESTS 3 COMPLETE: ");
+                group.leave();
+            }
+
+            @Override
+            public void onFail(ErrorResult error) {
+
+            }
+        });
+
+        group.notify(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    Thread.sleep(200);
+                    Log.d("DISPATCH", "ALL REQUESTS COMPLETE: ");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 
