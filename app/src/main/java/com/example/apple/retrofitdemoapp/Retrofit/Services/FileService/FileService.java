@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
+import com.example.apple.retrofitdemoapp.Helpers.FileHelper;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
@@ -14,6 +15,9 @@ import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
@@ -24,11 +28,12 @@ public final class FileService extends BaseApiService {
     private static final IFileService sServiceInstance = sRetrofit.create(IFileService.class);
     private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
 
-    public static OnFileRequestComplete<File> downloadFileListener; //Used by FileDownloadProgressInterceptor
+    public static Map<String, OnFileRequestComplete<File>> downloadFileListener =
+            new HashMap<String, OnFileRequestComplete<File>>(); //Used by FileDownloadProgressInterceptor
 
     public static void uploadFileWithProgress(Context context, File file, String category, OnFileRequestComplete<ResponseBody> completeCallback) {
 
-        String mimeType = getMimeTypeByExtension(context, file);
+        String mimeType = FileHelper.getMimeTypeByExtension(context, file);
         //Uncomment when do not need to detect upload progress anymore
         //MediaType mediaType = MediaType.parse(mimeType);
         //RequestBody requestFile = RequestBody.create(
@@ -55,7 +60,7 @@ public final class FileService extends BaseApiService {
 //        }
 
         String fullUrl = rootPath + "v1/file/" + fileId;
-        FileService.downloadFileListener = completeCallback;
+        FileService.downloadFileListener.put(fileId, completeCallback);
         Call<ResponseBody> fileRequest = sServiceInstance.download(fullUrl, format);
         proceedAsync(fileRequest, new OnRequestComplete<ResponseBody>() {
             @Override
@@ -65,36 +70,15 @@ public final class FileService extends BaseApiService {
                 FileCacherAsyncTask fileTask = new FileCacherAsyncTask(
                         context, result, fileId, fileExtension, isThumbnail, completeCallback);
                 fileTask.execute();
-                FileService.downloadFileListener = null;
+                FileService.downloadFileListener.remove(fileId);
             }
 
             @Override
             public void onFail(ErrorResult error) {
                 completeCallback.onFail(error);
-                FileService.downloadFileListener = null;
+                FileService.downloadFileListener.remove(fileId);
             }
         });
-    }
-
-    //TODO DELETE THIS SHIT LATER
-    public static String getFileExtension(File file) {
-        if (file != null) {
-            return android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString().toUpperCase());
-        } else {
-            return "";
-        }
-    }
-
-    //TODO DELETE THIS SHIT LATER
-    public static String getMimeTypeByExtension(Context context, File file) {
-        String extension = getFileExtension(file);
-        String mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
-        if (mime == null) {
-            Uri uri = Uri.fromFile(file);
-            ContentResolver contentResolver = context.getContentResolver();
-            mime = contentResolver.getType(uri);
-        }
-        return mime != null ? mime : "application/octet-stream";
     }
 
     private static class FileCacherAsyncTask extends AsyncTask<Void, Void, Void> {

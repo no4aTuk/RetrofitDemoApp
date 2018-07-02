@@ -3,7 +3,7 @@ package com.example.apple.retrofitdemoapp;
 import android.app.Application;
 import android.util.Log;
 
-import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
+import com.example.apple.retrofitdemoapp.Constants.ApiConstants;
 import com.example.apple.retrofitdemoapp.Helpers.ApiErrorHelper;
 import com.example.apple.retrofitdemoapp.Helpers.NetworkUtils;
 import com.example.apple.retrofitdemoapp.Helpers.Preferences;

@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.Helpers;
+package com.example.apple.retrofitdemoapp.Constants;
 
 public class ErrorCodes {
     public static final int UNAUTHORIZED = 401;

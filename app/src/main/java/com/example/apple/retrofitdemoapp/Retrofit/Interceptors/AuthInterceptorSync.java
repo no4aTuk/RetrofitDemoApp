@@ -1,7 +1,9 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
-import com.example.apple.retrofitdemoapp.Helpers.ErrorCodes;
-import com.example.apple.retrofitdemoapp.Helpers.HttpHeaders;
+import android.util.Log;
+
+import com.example.apple.retrofitdemoapp.Constants.ErrorCodes;
+import com.example.apple.retrofitdemoapp.Enums.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
@@ -14,7 +16,7 @@ import okhttp3.Response;
 
 public class AuthInterceptorSync implements Interceptor {
 
-    private CredentialsStorage credentialsStorage = null;
+    private CredentialsStorage credentialsStorage;
     private ApiConfiguration configuration;
 
     private AuthInterceptorSync() { }
@@ -27,7 +29,6 @@ public class AuthInterceptorSync implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
 
-        //CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
         String requestToken = credentialsStorage.getToken();
 
         Request request = chain.request();

@@ -1,6 +1,8 @@
 package com.example.apple.retrofitdemoapp.Helpers;
 
 import android.content.Context;
+
+import com.example.apple.retrofitdemoapp.Constants.ErrorCodes;
 import com.example.apple.retrofitdemoapp.R;
 
 public class ApiErrorHelper {

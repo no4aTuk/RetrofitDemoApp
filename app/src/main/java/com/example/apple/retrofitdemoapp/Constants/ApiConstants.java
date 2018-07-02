@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.Helpers;
+package com.example.apple.retrofitdemoapp.Constants;
 
 public class ApiConstants {
     public static final String BASE_API_URL = "http://tg.samozapis.ru:23349/tmc/dev/api/";;

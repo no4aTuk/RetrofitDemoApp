@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.Helpers;
+package com.example.apple.retrofitdemoapp.Enums;
 
 public enum HttpHeaders {
     Accept ("Accept"),

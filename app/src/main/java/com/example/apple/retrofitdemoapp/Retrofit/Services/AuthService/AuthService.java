@@ -1,11 +1,9 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
 
-import com.example.apple.retrofitdemoapp.Helpers.ApiConstants;
+import com.example.apple.retrofitdemoapp.Constants.ApiConstants;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
-import com.example.apple.retrofitdemoapp.Models.SignUp;
 import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
-import com.example.apple.retrofitdemoapp.Models.VerifyCode;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
@@ -13,13 +11,7 @@ import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 import java.io.IOException;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
 
 public final class AuthService extends BaseApiService {
     private static IAuthService sServiceInstance = sRetrofit.create(IAuthService.class);

@@ -1,6 +1,6 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
-import com.example.apple.retrofitdemoapp.Helpers.HttpHeaders;
+import com.example.apple.retrofitdemoapp.Enums.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import okhttp3.Response;
 
 public class HeadersInterceptor implements Interceptor {
 
-    private ApiConfiguration configuration = ApiConfiguration.getInstance();
+    private ApiConfiguration configuration;
 
     private HeadersInterceptor() {}
 
@@ -22,8 +22,6 @@ public class HeadersInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
-
-        //final ApiConfiguration configuration = ApiConfiguration.getInstance();
 
         Request request = original.newBuilder()
                 .header(HttpHeaders.Accept.toString(), "application/json")

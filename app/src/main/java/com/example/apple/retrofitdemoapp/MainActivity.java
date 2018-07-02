@@ -18,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.apple.retrofitdemoapp.Enums.FileCategory;
+import com.example.apple.retrofitdemoapp.Helpers.FileHelper;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
@@ -39,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private Button button;
     private ImageView imageView;
     private ProgressBar progressBar;
+    private ProgressBar progressBar2;
+    private ProgressBar progressBar3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +53,13 @@ public class MainActivity extends AppCompatActivity {
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //openGallery();
-                //doSomething();
-                getToken();
+                openGallery();
             }
         });
         this.progressBar = findViewById(R.id.progressBar);
+        this.progressBar2 = findViewById(R.id.progressBar2);
+        this.progressBar3 = findViewById(R.id.progressBar3);
 
-        //doSomething();
-        BreakToken();
     }
 
     @Override
@@ -83,17 +85,21 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             Uri uri = data.getData();
-            File file = new File(getImagePath(uri));
-            uploadFile(file);
-
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
-
-                this.imageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+            //File file = new File(getImagePath(uri));
+            File file = FileHelper.generateFile(MainActivity.this, uri);
+            if (file != null) {
+                // add it into UI
+                uploadFile(file);
             }
+
+//            try {
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+//                // Log.d(TAG, String.valueOf(bitmap));
+//
+//                this.imageView.setImageBitmap(bitmap);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -120,15 +126,15 @@ public class MainActivity extends AppCompatActivity {
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE}, PICK_IMAGE_REQUEST);
             } else {
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
+                //Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                //startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
 
-//                Intent intent = new Intent();
-//                // Show only images, no videos or anything else
-//                intent.setType("image/*");
-//                intent.setAction(Intent.ACTION_GET_CONTENT);
-//                // Always show the chooser (if there are multiple options available)
-//                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+                Intent intent = new Intent();
+                // Show only images, no videos or anything else
+                intent.setType("video/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                // Always show the chooser (if there are multiple options available)
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -136,19 +142,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void uploadFile(File file) {
-        String category = "image";
-//        FileService.uploadFile(MainActivity.this, file, category, new OnRequestComplete<ResponseBody>() {
-//            @Override
-//            public void onSuccess(ResponseBody result) {
-//                int a = 0;
-//            }
-//
-//            @Override
-//            public void onFail(ErrorResult error) {
-//                int b = 0;
-//            }
-//        });
-        FileService.uploadFileWithProgress(MainActivity.this, file, category, new OnFileRequestComplete<ResponseBody>() {
+
+        String mimeType = FileHelper.getMimeTypeByExtension(MainActivity.this, file);
+        FileCategory category = FileHelper.getFileCategory(mimeType);
+
+        FileService.uploadFileWithProgress(MainActivity.this, file, category.toString(), new OnFileRequestComplete<ResponseBody>() {
             @Override
             public void onProgress(int percents) {
                 Log.d("UPLOAD", "onSuccess: " + percents);
@@ -163,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(ErrorResult error) {
-                int a = 0;
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -177,126 +175,42 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(ErrorResult error) {
-                //TODO show error
-                int a = 0;
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void doSomething() {
+    private void downloadFiles() {
 
 
-        String fileId = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
-        String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
-        String fileExt = "jpg";
-        FileService.downloadFileWithProgress(MainActivity.this, fileId, fileExt, null, new OnFileRequestComplete<File>() {
+        //String file1Id = "a80cd6da-e21e-494a-85a2-d2459a7d076c";
+        //String fileId2 = "acd4f7e8-bf95-471d-875c-2efa21261159";
+        String file1Id = "3f436350-6f3a-4223-98fd-03590a9236a4";
+        String file2Id = "ef961c71-97e6-488f-be6d-ad3be535b810";
+        String file3Id = "f15ddd42-59a8-4440-a136-d23a7a7d03d1";
+        //Video1 "3f436350-6f3a-4223-98fd-03590a9236a4";
+        //Video2 "ef961c71-97e6-488f-be6d-ad3be535b810";
+        //Video3 "f15ddd42-59a8-4440-a136-d23a7a7d03d1";
+        //String fileExt = "jpg";
+        String fileExt = "mp4";
+        FileService.downloadFileWithProgress(MainActivity.this, file1Id, fileExt, null, new OnFileRequestComplete<File>() {
             @Override
             public void onProgress(int percents) {
-                Log.d("INTERCEPTOR", "onProgress: " + percents);
+                //Log.d("INTERCEPTOR", "onProgress1: " + percents);
                 progressBar.setProgress(percents);
+                CredentialsStorage.getInstance().setToken("asdsd");
             }
 
             @Override
             public void onSuccess(File result) {
-                Log.d("INTERCEPTOR", "onProgress: complete");
+                Log.d("INTERCEPTOR", "onProgress1: complete");
                 int a = 0;
                 progressBar.setProgress(100);
             }
 
             @Override
             public void onFail(ErrorResult error) {
-                int a = 0;
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void BreakToken() {
-        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-            @Override
-            public void onSuccess(UserPermissions result) {
-
-                Log.d("TOKEN", "onSuccess: BREAK TOKEN");
-                CredentialsStorage.getInstance().setToken("asdads");
-                //CredentialsStorage.getInstance().setRefreshToken("");
-
-                AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-                    @Override
-                    public void onSuccess(UserPermissions result) {
-
-                        Log.d("TOKEN", "onSuccess: ");
-                        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-                            @Override
-                            public void onSuccess(UserPermissions result) {
-                                Log.d("TOKEN", "onSuccess: ");
-                            }
-
-                            @Override
-                            public void onFail(ErrorResult error) {
-                                Log.d("TOKEN", "onFail: ");
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFail(ErrorResult error) {
-                        Log.d("TOKEN", "onFail: ");
-                    }
-                });
-
-                AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-                    @Override
-                    public void onSuccess(UserPermissions result) {
-
-                        Log.d("TOKEN", "onSuccess: ");
-                        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-                            @Override
-                            public void onSuccess(UserPermissions result) {
-                                Log.d("TOKEN", "onSuccess: ");
-                            }
-
-                            @Override
-                            public void onFail(ErrorResult error) {
-                                Log.d("TOKEN", "onFail: ");
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFail(ErrorResult error) {
-                        Log.d("TOKEN", "onFail: ");
-                    }
-                });
-
-                AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-                    @Override
-                    public void onSuccess(UserPermissions result) {
-
-                        Log.d("TOKEN", "onSuccess: ");
-                        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
-                            @Override
-                            public void onSuccess(UserPermissions result) {
-                                Log.d("TOKEN", "onSuccess: ");
-                            }
-
-                            @Override
-                            public void onFail(ErrorResult error) {
-                                Log.d("TOKEN", "onFail: ");
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFail(ErrorResult error) {
-                        Log.d("TOKEN", "onFail: ");
-                    }
-                });
-            }
-
-            @Override
-            public void onFail(ErrorResult error) {
-                Log.d("TOKEN", "onFail: ");
             }
         });
     }

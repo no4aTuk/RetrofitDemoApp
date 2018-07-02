@@ -1,7 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services;
 
 import com.example.apple.retrofitdemoapp.Exceptions.NoConnectionException;
-import com.example.apple.retrofitdemoapp.Helpers.ErrorCodes;
+import com.example.apple.retrofitdemoapp.Constants.ErrorCodes;
 import com.example.apple.retrofitdemoapp.Models.BackendError;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;

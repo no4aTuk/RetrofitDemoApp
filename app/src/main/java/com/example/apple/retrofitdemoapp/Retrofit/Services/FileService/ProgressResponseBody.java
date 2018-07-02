@@ -4,6 +4,7 @@ import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileReques
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -47,8 +48,8 @@ public class ProgressResponseBody extends ResponseBody {
                 long bytesRead = super.read(sink, byteCount);
                 // read() returns the number of bytes read, or -1 if this source is exhausted.
                 totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-                //mListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
-                int result = (int)((100 * bytesRead) / responseBody.contentLength());
+                //int result = (int)((100 * bytesRead) / responseBody.contentLength());
+                int result = (int)((100 * totalBytesRead) / responseBody.contentLength());
                 mListener.onProgress(result);
                 return bytesRead;
             }

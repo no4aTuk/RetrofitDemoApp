@@ -2,6 +2,7 @@ package com.example.apple.retrofitdemoapp.Helpers;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.StatFs;
 import android.util.Log;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import okhttp3.ResponseBody;
 public class FileCacheHelper {
 
     private static final String THUMBNAIL_PREFIX = "thumbnail_";
+    private static final int MAX_FILE_SIZE_MB = 100;
 
     public static File saveFileToDisk(Context context, ResponseBody body, String fileId, String fileExtension, boolean isThumbnail) {
         try {
@@ -67,7 +69,7 @@ public class FileCacheHelper {
 
     private static File prepareFileName(Context context, String fileId, String fileExtension, boolean isThumbnail, boolean isSaving) {
         //Check is external storage available
-        if (isSaving && !isExternalStorageWritable()) {
+        if (isSaving && !isExternalStorageWritable() || isSaving && !checkAvailableSpace(MAX_FILE_SIZE_MB)) {
             return null;
         }
         if (!isSaving && !isExternalStorageReadable()) {
@@ -116,6 +118,17 @@ public class FileCacheHelper {
         if (Environment.MEDIA_MOUNTED.equals(state) ||
                 Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             return true;
+        }
+        return false;
+    }
+
+    private static boolean checkAvailableSpace(int threshold) {
+        if (isExternalStorageWritable()) {
+            StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long bytesAvailable = 0l;
+            bytesAvailable = stat.getBlockSizeLong() * stat.getAvailableBlocksLong();
+            bytesAvailable = bytesAvailable / 1048576;
+            return bytesAvailable > threshold;
         }
         return false;
     }

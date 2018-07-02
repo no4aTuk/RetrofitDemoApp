@@ -10,8 +10,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.File;
+import java.util.Dictionary;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -19,6 +22,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitBuilder {
 
     private static Retrofit sInstance;
+    private static final int DEFAULT_TIMEOUT = 10; // seconds
+    private static final int READ_WRITE_TIMEOUT = 5; //minutes
 
     public static Retrofit getsInstance(ApiConfiguration configuration, CredentialsStorage storage) {
         if (sInstance == null) {
@@ -30,7 +35,9 @@ public class RetrofitBuilder {
     private static Retrofit createInstance(final ApiConfiguration configuration, CredentialsStorage credentialsStorage) {
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10 * 1000, TimeUnit.MILLISECONDS)
+                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_WRITE_TIMEOUT, TimeUnit.MINUTES)
+                .writeTimeout(READ_WRITE_TIMEOUT, TimeUnit.MINUTES)
                 .addInterceptor(new NetworkConnectionInterceptor() {
                     @Override
                     public boolean isNetworkAvailable() {
@@ -42,7 +49,7 @@ public class RetrofitBuilder {
                 .addInterceptor(new AuthInterceptorSync(credentialsStorage, configuration))
                 .addNetworkInterceptor(new FileDownloadProgressInterceptor() {
                     @Override
-                    public OnFileRequestComplete<File> downloadProgressListener() {
+                    public Map<String, OnFileRequestComplete<File>> downloadProgressListeners() {
                         return FileService.downloadFileListener;
                     }
                 })
