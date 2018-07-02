@@ -1,5 +1,10 @@
 package com.example.apple.retrofitdemoapp.Retrofit;
 
+//HOW TO USE:
+//Create new DispatchGroup object
+//1. call group.enter() before every ASYNC method u want to wait for
+//2. call group.leave() every time u ended work inside ASYNC the method callback
+//3. call group.notify() and pass callback that u want to execute after all group methods were finished
 public class DispatchGroup {
 
     private int count = 0;
