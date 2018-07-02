@@ -29,7 +29,7 @@ public final class FileService extends BaseApiService {
     private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
 
     public static Map<String, OnFileRequestComplete<File>> downloadFileListener =
-            new HashMap<String, OnFileRequestComplete<File>>(); //Used by FileDownloadProgressInterceptor
+            new HashMap<>(); //Used by FileDownloadProgressInterceptor
 
     public static void uploadFileWithProgress(Context context, File file, String category, OnFileRequestComplete<ResponseBody> completeCallback) {
 
@@ -53,11 +53,11 @@ public final class FileService extends BaseApiService {
                                                 final OnFileRequestComplete<File> completeCallback) {
         //Check file on disk
         final boolean isThumbnail = format != null;
-//        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
-//        if (cachedFile != null) {
-//            completeCallback.onSuccess(cachedFile);
-//            return;
-//        }
+        File cachedFile = FileCacheHelper.getFileFromDisk(context, fileId, fileExtension, isThumbnail);
+        if (cachedFile != null) {
+            completeCallback.onSuccess(cachedFile);
+            return;
+        }
 
         String fullUrl = rootPath + "v1/file/" + fileId;
         FileService.downloadFileListener.put(fileId, completeCallback);

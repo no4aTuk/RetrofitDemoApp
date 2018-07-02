@@ -48,7 +48,6 @@ public class ProgressResponseBody extends ResponseBody {
                 long bytesRead = super.read(sink, byteCount);
                 // read() returns the number of bytes read, or -1 if this source is exhausted.
                 totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-                //int result = (int)((100 * bytesRead) / responseBody.contentLength());
                 int result = (int)((100 * totalBytesRead) / responseBody.contentLength());
                 mListener.onProgress(result);
                 return bytesRead;
