@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
     private void GroupRequest() {
         final DispatchGroup group = new DispatchGroup();
 
-
         group.enter();
         AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
             @Override
@@ -133,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(ErrorResult error) {
-
+                group.leave();
+                //TODO show err
             }
         });
 
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(ErrorResult error) {
-
+                group.leave();
             }
         });
 
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(ErrorResult error) {
-
+                group.leave();
             }
         });
 

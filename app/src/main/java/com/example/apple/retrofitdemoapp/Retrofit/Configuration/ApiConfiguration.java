@@ -34,6 +34,13 @@ public final class ApiConfiguration {
 
     private ApiConfiguration() { }
 
+    public ApiConfiguration(String apiUrl, String fileServerUrl,
+                            String lang, String appType) {
+        this.mApiURL = apiUrl;
+        this.mFileServerURL = fileServerUrl;
+        this.mLanguage = lang;
+        this.mAppType = appType;
+    }
 
     public String getApiURL() {
         return mApiURL;

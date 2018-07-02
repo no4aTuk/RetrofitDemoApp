@@ -14,6 +14,12 @@ public class CredentialsStorage {
 
     private CredentialsStorage() {}
 
+    public CredentialsStorage(Context context, String accessToken, String refreshToken) {
+        this.mContext = new WeakReference<>(context.getApplicationContext());
+        this.mToken = accessToken;
+        this.mRefreshToken = refreshToken;
+    }
+
     private static CredentialsStorage sInstance;
 
     public static void setupInstance(Context context, String accessToken, String refreshToken) {

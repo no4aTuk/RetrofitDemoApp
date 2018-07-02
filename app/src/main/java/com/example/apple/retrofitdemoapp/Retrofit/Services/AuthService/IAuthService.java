@@ -12,7 +12,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
-interface IAuthService {
+public interface IAuthService {
     String rootPath = "v1/auth/";
 
     @POST(rootPath + "signup")
