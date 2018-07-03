@@ -7,15 +7,16 @@ import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService2;
 
 import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class AuthService2 extends BaseApiService {
+public class AuthService2 extends BaseApiService2 {
     //private final static IAuthService sServiceInstance = sRetrofit.create(IAuthService.class);
-    private final IAuthService sServiceInstance;
+    private IAuthService sServiceInstance;
 
     public AuthService2(IAuthService service) {
         this.sServiceInstance = service;
@@ -70,7 +71,8 @@ public class AuthService2 extends BaseApiService {
     }
 
     private void updateAccessToken(Token token) {
-        CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+        //CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+        CredentialsStorage credentialsStorage = this.credentialsStorage;
         credentialsStorage.setToken(String.format("%s %s", token.token_type, token.access_token));
         credentialsStorage.setRefreshToken(token.refresh_token);
     }

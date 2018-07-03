@@ -12,8 +12,10 @@ public class ApiConfigurationModule {
     private ApiConfiguration mApiConfiguration;
 
     public ApiConfigurationModule(String apiUrl, String fileServerUrl,
-                                  String lang, String appType) {
-        this.mApiConfiguration = new ApiConfiguration(apiUrl, fileServerUrl, lang, appType);
+                                  String lang, String appType, ApiConfiguration.ApiConfigurationListener configurationListener) {
+        ApiConfiguration configuration = new ApiConfiguration(apiUrl, fileServerUrl, lang, appType);
+        configuration.setListener(configurationListener);
+        this.mApiConfiguration = configuration;
     }
 
     @ApiApplicationScope

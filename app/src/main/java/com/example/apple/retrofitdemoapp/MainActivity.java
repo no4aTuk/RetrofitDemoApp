@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -28,10 +27,10 @@ import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestCom
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.DispatchGroup;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService2;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
 
 import java.io.File;
-import java.io.IOException;
 
 import okhttp3.ResponseBody;
 
@@ -45,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar2;
     private ProgressBar progressBar3;
 
+    public AuthService2 mAuthService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,12 +56,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //openGallery();
-                GroupRequest();
+                //GroupRequest();
+                getToken();
             }
         });
         this.progressBar = findViewById(R.id.progressBar);
         this.progressBar2 = findViewById(R.id.progressBar2);
         this.progressBar3 = findViewById(R.id.progressBar3);
+
+        mAuthService = BaseApplication.get(this).api().authService();
 
     }
 
@@ -230,7 +234,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getToken() {
-        AuthService.token("+79085111864", "Qwerty123", new OnRequestComplete<Token>() {
+//        AuthService.token("+79085111864", "Qwerty123", new OnRequestComplete<Token>() {
+//            @Override
+//            public void onSuccess(Token result) {
+//                int a = 0;
+//            }
+//
+//            @Override
+//            public void onFail(ErrorResult error) {
+//                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+//            }
+//        });
+        mAuthService.token("+79085111864", "Qwerty123", new OnRequestComplete<Token>() {
             @Override
             public void onSuccess(Token result) {
                 int a = 0;
@@ -238,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(ErrorResult error) {
-                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

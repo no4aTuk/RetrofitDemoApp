@@ -8,6 +8,7 @@ import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.FileDownloadProgr
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.HeadersInterceptor;
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.NetworkConnectionInterceptor;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService2;
 
 import java.io.File;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class OkHttpModule {
     private static final int DEFAULT_TIMEOUT = 10; // seconds
     private static final int READ_WRITE_TIMEOUT = 5; //minutes
 
+    @Provides
     public OkHttpClient okHttpClient(HeadersInterceptor headersInterceptor, AuthInterceptorSync authInterceptorSync,
                         NetworkConnectionInterceptor networkConnectionInterceptor,
                         FileDownloadProgressInterceptor fileDownloadProgressInterceptor) {
@@ -68,11 +70,11 @@ public class OkHttpModule {
 //        };
 //    }
     @Provides
-    FileDownloadProgressInterceptor fileDownloadProgressInterceptor(final Map<String, OnFileRequestComplete<File>> downloadProgressCallbacks) {
+    FileDownloadProgressInterceptor fileDownloadProgressInterceptor() {
         return new FileDownloadProgressInterceptor() {
             @Override
             public Map<String, OnFileRequestComplete<File>> downloadProgressListeners() {
-                return FileService.downloadFileListener; //TODO need to decide what implementation is better
+                return FileService2.downloadFileListener; //TODO need to decide what implementation is better
             }
         };
     }

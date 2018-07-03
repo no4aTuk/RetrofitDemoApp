@@ -12,15 +12,17 @@ import dagger.Provides;
 @Module(includes = AppContextModule.class)
 public class CredentialsStorageModule {
 
-    private CredentialsStorage mCredentialsStorage;
+    private String accessToken;
+    private String refreshToken;
 
-    public CredentialsStorageModule(@ApplicationContext Context context, String accessToken, String refreshToken) {
-        this.mCredentialsStorage = new CredentialsStorage(context, accessToken, refreshToken);
+    public CredentialsStorageModule(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     @ApiApplicationScope
     @Provides
-    CredentialsStorage credentialsStorage() {
-        return this.mCredentialsStorage;
+    CredentialsStorage credentialsStorage(@ApplicationContext Context context) {
+        return new CredentialsStorage(context, accessToken, refreshToken);
     }
 }
