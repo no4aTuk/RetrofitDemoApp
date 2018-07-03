@@ -11,13 +11,9 @@ import com.example.apple.retrofitdemoapp.Helpers.ApiErrorHelper;
 import com.example.apple.retrofitdemoapp.Helpers.NetworkUtils;
 import com.example.apple.retrofitdemoapp.Helpers.Preferences;
 import com.example.apple.retrofitdemoapp.Modules.ApiConfigurationModule;
-import com.example.apple.retrofitdemoapp.Modules.ApiModule;
 import com.example.apple.retrofitdemoapp.Modules.AppContextModule;
 import com.example.apple.retrofitdemoapp.Modules.CredentialsStorageModule;
-import com.example.apple.retrofitdemoapp.Modules.OkHttpModule;
-import com.example.apple.retrofitdemoapp.Retrofit.ApiEntryPoint;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
-import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 
 import java.util.Locale;
 
@@ -29,12 +25,6 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
     public void onCreate() {
         super.onCreate();
 
-        //Configure api
-//        ApiConfiguration.setupInstance(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
-//                getAppLanguage(), ApiConstants.APP_TYPE);
-//        ApiConfiguration.getInstance().setListener(this);
-//        initUserCredentials();
-
         String token = Preferences.getToken(getApplicationContext());
         String refreshToken = Preferences.getRefreshToken(getApplicationContext());
 
@@ -45,7 +35,6 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
                 .appContextModule(new AppContextModule(this))
                 .build();
         this.apiServiceComponent = apiServiceComponent;
-        ApiEntryPoint.getInstance().setApiServiceComponent(apiServiceComponent);
     }
 
     public static BaseApplication get(Activity activity) {
@@ -65,12 +54,6 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
         } else {
             return ApiConstants.APP_LANGUAGE_RU;
         }
-    }
-
-    private void initUserCredentials() {
-        String token = Preferences.getToken(getApplicationContext());
-        String refreshToken = Preferences.getRefreshToken(getApplicationContext());
-        CredentialsStorage.setupInstance(getApplicationContext(), token, refreshToken);
     }
 
     //-------------------------------------------

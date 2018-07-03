@@ -1,8 +1,6 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services.FileService;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.example.apple.retrofitdemoapp.Helpers.FileCacheHelper;
@@ -11,11 +9,11 @@ import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
+import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.BaseApiService;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,13 +23,20 @@ import retrofit2.Call;
 
 public final class FileService extends BaseApiService {
 
-    private static final IFileService sServiceInstance = sRetrofit.create(IFileService.class);
-    private static final String rootPath = ApiConfiguration.getInstance().getFileServerURL();
+    private IFileService service;
+    private String rootPath;
+
+    public FileService(IFileService service, ApiConfiguration configuration,
+                       CredentialsStorage credentialsStorage) {
+        super(configuration, credentialsStorage);
+        this.service = service;
+        rootPath = configuration.getFileServerURL();
+    }
 
     public static Map<String, OnFileRequestComplete<File>> downloadFileListener =
             new HashMap<>(); //Used by FileDownloadProgressInterceptor
 
-    public static void uploadFileWithProgress(Context context, File file, String category, OnFileRequestComplete<ResponseBody> completeCallback) {
+    public void uploadFileWithProgress(Context context, File file, String category, OnFileRequestComplete<ResponseBody> completeCallback) {
 
         String mimeType = FileHelper.getMimeTypeByExtension(context, file);
         //Uncomment when do not need to detect upload progress anymore
@@ -44,11 +49,11 @@ public final class FileService extends BaseApiService {
                 file.getName(), requestFile);
 
         String fullUrl = rootPath + "v1/file/save/" + category;
-        Call<ResponseBody> uploadRequest = sServiceInstance.upload(fullUrl, body, mimeType);
+        Call<ResponseBody> uploadRequest = service.upload(fullUrl, body, mimeType);
         proceedAsync(uploadRequest, completeCallback);
     }
 
-    public static void downloadFileWithProgress(final Context context, final String fileId,
+    public void downloadFileWithProgress(final Context context, final String fileId,
                                                 final String fileExtension, final String format,
                                                 final OnFileRequestComplete<File> completeCallback) {
         //Check file on disk
@@ -61,7 +66,7 @@ public final class FileService extends BaseApiService {
 
         String fullUrl = rootPath + "v1/file/" + fileId;
         FileService.downloadFileListener.put(fileId, completeCallback);
-        Call<ResponseBody> fileRequest = sServiceInstance.download(fullUrl, format);
+        Call<ResponseBody> fileRequest = service.download(fullUrl, format);
         proceedAsync(fileRequest, new OnRequestComplete<ResponseBody>() {
             @Override
             public void onSuccess(final ResponseBody result) {

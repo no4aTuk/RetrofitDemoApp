@@ -7,8 +7,9 @@ import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.AuthInterceptorSy
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.FileDownloadProgressInterceptor;
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.HeadersInterceptor;
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.NetworkConnectionInterceptor;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthServiceHolder;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
-import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService2;
+import com.example.apple.retrofitdemoapp.Scopes.ApiApplicationScope;
 
 import java.io.File;
 import java.util.Map;
@@ -17,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
 
 @Module(includes = {ApiConfigurationModule.class, CredentialsStorageModule.class})
 public class OkHttpModule {
@@ -46,8 +46,14 @@ public class OkHttpModule {
     }
 
     @Provides
-    AuthInterceptorSync authInterceptorSync(ApiConfiguration apiConfiguration, CredentialsStorage credentialsStorage) {
-        return new AuthInterceptorSync(credentialsStorage, apiConfiguration);
+    AuthInterceptorSync authInterceptorSync(AuthServiceHolder authServiceHolder, ApiConfiguration apiConfiguration, CredentialsStorage credentialsStorage) {
+        return new AuthInterceptorSync(credentialsStorage, apiConfiguration, authServiceHolder);
+    }
+
+    @ApiApplicationScope
+    @Provides
+    public AuthServiceHolder authServiceHolder() {
+        return new AuthServiceHolder();
     }
 
     @Provides
@@ -74,7 +80,7 @@ public class OkHttpModule {
         return new FileDownloadProgressInterceptor() {
             @Override
             public Map<String, OnFileRequestComplete<File>> downloadProgressListeners() {
-                return FileService2.downloadFileListener; //TODO need to decide what implementation is better
+                return FileService.downloadFileListener; //TODO need to decide what implementation is better
             }
         };
     }

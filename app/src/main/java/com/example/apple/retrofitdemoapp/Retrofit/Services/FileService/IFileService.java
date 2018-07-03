@@ -12,7 +12,7 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
-interface IFileService {
+public interface IFileService {
 
     @Multipart
     @POST

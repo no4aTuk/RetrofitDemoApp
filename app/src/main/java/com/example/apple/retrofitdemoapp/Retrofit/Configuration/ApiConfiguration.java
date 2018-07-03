@@ -1,5 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
+import java.lang.ref.WeakReference;
+
 public final class ApiConfiguration {
 
     public interface ApiConfigurationListener {
@@ -12,25 +14,7 @@ public final class ApiConfiguration {
     private String mFileServerURL;
     private String mLanguage;
     private String mAppType;
-    private ApiConfigurationListener mListener;
-
-    private static ApiConfiguration sInstance;
-
-    public static void setupInstance(String apiUrl, String fileServerUrl,
-                              String lang, String appType) {
-
-        if (sInstance == null) {
-            sInstance = new ApiConfiguration();
-        }
-        sInstance.mApiURL = apiUrl;
-        sInstance.mFileServerURL = fileServerUrl;
-        sInstance.mLanguage = lang;
-        sInstance.mAppType = appType;
-    }
-
-    public static ApiConfiguration getInstance() {
-        return  sInstance;
-    }
+    private WeakReference<ApiConfigurationListener> mListener;
 
     private ApiConfiguration() { }
 
@@ -59,10 +43,10 @@ public final class ApiConfiguration {
     }
 
     public ApiConfigurationListener getListener() {
-        return mListener;
+        return mListener.get();
     }
 
     public void setListener(ApiConfigurationListener mListener) {
-        this.mListener = mListener;
+        this.mListener = new WeakReference<>(mListener);
     }
 }

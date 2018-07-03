@@ -5,6 +5,8 @@ import android.content.Context;
 import com.example.apple.retrofitdemoapp.Qualifiers.ApplicationContext;
 import com.example.apple.retrofitdemoapp.Scopes.ApiApplicationScope;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 

@@ -27,10 +27,12 @@ import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestCom
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.Retrofit.DispatchGroup;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
-import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService2;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.ConsultationService;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
 
 import java.io.File;
+
+import javax.inject.Inject;
 
 import okhttp3.ResponseBody;
 
@@ -44,7 +46,15 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar2;
     private ProgressBar progressBar3;
 
-    public AuthService2 mAuthService;
+    //@Inject
+    public AuthService mAuthService;
+    @Inject
+    public FileService mFileService;
+    @Inject
+    public ConsultationService mConsultationService;
+
+    @Inject
+    public CredentialsStorage mCredentialsStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +67,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 //openGallery();
                 //GroupRequest();
-                getToken();
+                //getToken();
+                createConsultation();
             }
         });
         this.progressBar = findViewById(R.id.progressBar);
         this.progressBar2 = findViewById(R.id.progressBar2);
         this.progressBar3 = findViewById(R.id.progressBar3);
 
-        mAuthService = BaseApplication.get(this).api().authService();
-
+        //mAuthService = BaseApplication.get(this).api().authService();
+        BaseApplication.get(this).api().inject(this);
     }
 
     @Override
@@ -122,27 +133,53 @@ public class MainActivity extends AppCompatActivity {
         return picturePath;
     }
 
+    private void createConsultation() {
+        mConsultationService.sendRequest(new OnRequestComplete<ResponseBody>() {
+            @Override
+            public void onSuccess(ResponseBody result) {
+                mCredentialsStorage.setToken("");
+                mConsultationService.sendRequest(new OnRequestComplete<ResponseBody>() {
+                    @Override
+                    public void onSuccess(ResponseBody result) {
+                        int a = 0;
+                    }
+
+                    @Override
+                    public void onFail(ErrorResult error) {
+                        Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFail(ErrorResult error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void GroupRequest() {
         final DispatchGroup group = new DispatchGroup();
 
         group.enter();
-        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+        mAuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
             @Override
             public void onSuccess(UserPermissions result) {
 
                 Log.d("DISPATCH", "REQUESTS 1 COMPLETE: ");
+                mCredentialsStorage.setToken("");
                 group.leave();
             }
 
             @Override
             public void onFail(ErrorResult error) {
                 group.leave();
-                //TODO show err
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
         group.enter();
-        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+        mAuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
             @Override
             public void onSuccess(UserPermissions result) {
                 Log.d("DISPATCH", "REQUESTS 2 COMPLETE: ");
@@ -152,20 +189,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFail(ErrorResult error) {
                 group.leave();
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
         group.enter();
-        AuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
+        mAuthService.userPermissions(new OnRequestComplete<UserPermissions>() {
             @Override
             public void onSuccess(UserPermissions result) {
                 Log.d("DISPATCH", "REQUESTS 3 COMPLETE: ");
                 group.leave();
+
             }
 
             @Override
             public void onFail(ErrorResult error) {
                 group.leave();
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -213,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         String mimeType = FileHelper.getMimeTypeByExtension(MainActivity.this, file);
         FileCategory category = FileHelper.getFileCategory(mimeType);
 
-        FileService.uploadFileWithProgress(MainActivity.this, file, category.toString(), new OnFileRequestComplete<ResponseBody>() {
+        mFileService.uploadFileWithProgress(MainActivity.this, file, category.toString(), new OnFileRequestComplete<ResponseBody>() {
             @Override
             public void onProgress(int percents) {
                 Log.d("UPLOAD", "onSuccess: " + percents);
@@ -271,12 +311,12 @@ public class MainActivity extends AppCompatActivity {
         //Video3 "f15ddd42-59a8-4440-a136-d23a7a7d03d1";
         //String fileExt = "jpg";
         String fileExt = "mp4";
-        FileService.downloadFileWithProgress(MainActivity.this, file1Id, fileExt, null, new OnFileRequestComplete<File>() {
+        mFileService.downloadFileWithProgress(MainActivity.this, file1Id, fileExt, null, new OnFileRequestComplete<File>() {
             @Override
             public void onProgress(int percents) {
                 //Log.d("INTERCEPTOR", "onProgress1: " + percents);
                 progressBar.setProgress(percents);
-                CredentialsStorage.getInstance().setToken("asdsd");
+                mCredentialsStorage.setToken("asdsd");
             }
 
             @Override

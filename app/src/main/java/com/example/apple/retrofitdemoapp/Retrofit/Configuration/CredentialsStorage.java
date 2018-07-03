@@ -20,23 +20,6 @@ public class CredentialsStorage {
         this.mRefreshToken = refreshToken;
     }
 
-    private static CredentialsStorage sInstance;
-
-    public static void setupInstance(Context context, String accessToken, String refreshToken) {
-
-        if (sInstance == null) {
-            sInstance = new CredentialsStorage();
-        }
-        //Just to be sure that passed single global application context
-        sInstance.mContext = new WeakReference<>(context.getApplicationContext());
-        sInstance.mToken = accessToken;
-        sInstance.mRefreshToken = refreshToken;
-    }
-
-    public static CredentialsStorage getInstance() {
-        return  sInstance;
-    }
-
     public String getToken() {
         return mToken;
     }

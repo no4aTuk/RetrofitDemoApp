@@ -1,12 +1,10 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Interceptors;
 
-import android.util.Log;
-
 import com.example.apple.retrofitdemoapp.Constants.ErrorCodes;
 import com.example.apple.retrofitdemoapp.Enums.HttpHeaders;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
-import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthServiceHolder;
 
 import java.io.IOException;
 
@@ -18,12 +16,14 @@ public class AuthInterceptorSync implements Interceptor {
 
     private CredentialsStorage credentialsStorage;
     private ApiConfiguration configuration;
+    private AuthServiceHolder authServiceHolder;
 
     private AuthInterceptorSync() { }
 
-    public AuthInterceptorSync(CredentialsStorage storage, ApiConfiguration configuration) {
+    public AuthInterceptorSync(CredentialsStorage storage, ApiConfiguration configuration, AuthServiceHolder serviceHolder) {
         this.credentialsStorage = storage;
         this.configuration = configuration;
+        this.authServiceHolder = serviceHolder;
     }
 
     @Override
@@ -83,7 +83,9 @@ public class AuthInterceptorSync implements Interceptor {
     }
 
     private int refreshToken() {
-        return AuthService.refreshToken();
+        //return AuthService.refreshToken();
+        if (authServiceHolder.get() == null) return ErrorCodes.BAD_REQUEST;
+        return authServiceHolder.get().refreshToken();
     }
 
     private void logout() {

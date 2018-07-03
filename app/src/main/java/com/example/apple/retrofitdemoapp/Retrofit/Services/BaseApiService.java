@@ -1,13 +1,12 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services;
 
-import com.example.apple.retrofitdemoapp.Exceptions.NoConnectionException;
 import com.example.apple.retrofitdemoapp.Constants.ErrorCodes;
+import com.example.apple.retrofitdemoapp.Exceptions.NoConnectionException;
 import com.example.apple.retrofitdemoapp.Models.BackendError;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
-import com.example.apple.retrofitdemoapp.Retrofit.Configuration.RetrofitBuilder;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -15,16 +14,18 @@ import java.io.IOException;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class BaseApiService {
 
-    private final static ApiConfiguration configuration = ApiConfiguration.getInstance();
-    private final static CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+    protected ApiConfiguration configuration;
+    protected CredentialsStorage credentialsStorage;
 
-    protected static Retrofit sRetrofit = RetrofitBuilder.getsInstance(configuration, credentialsStorage);
+    public BaseApiService(ApiConfiguration configuration, CredentialsStorage credentialsStorage) {
+        this.configuration = configuration;
+        this.credentialsStorage = credentialsStorage;
+    }
 
-    public static <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
+    public <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
         request.enqueue(new Callback<T>() {
             @Override
             public void onResponse(Call<T> call, Response<T> response) {
@@ -38,7 +39,7 @@ public class BaseApiService {
         });
     }
 
-    public static <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
+    public <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
         try {
             Response<T> response = request.execute();
             handleSuccessResult(response, callback);
@@ -47,7 +48,7 @@ public class BaseApiService {
         }
     }
 
-    private static <T> void handleSuccessResult(Response<T> response, OnRequestComplete<T> callback) {
+    private <T> void handleSuccessResult(Response<T> response, OnRequestComplete<T> callback) {
         if (response.isSuccessful() && callback != null) {
             callback.onSuccess(response.body());
         } else if (callback != null) {
@@ -55,7 +56,7 @@ public class BaseApiService {
         }
     }
 
-    private static <T> void handleFailResult(Throwable t, OnRequestComplete<T> callback) {
+    private <T> void handleFailResult(Throwable t, OnRequestComplete<T> callback) {
         if (callback == null) return;
 
         String message = t.getLocalizedMessage();
@@ -72,12 +73,11 @@ public class BaseApiService {
         callback.onFail(new ErrorResult(statusCode, message));
     }
 
-    private static ErrorResult getServerError(int code, Response response) {
+    private ErrorResult getServerError(int code, Response response) {
 
         String errorMessage = "";
         switch (code) {
             case ErrorCodes.NOT_FOUND:
-            case ErrorCodes.BAD_REQUEST:
             case ErrorCodes.INTERNAL_ERROR:
             case ErrorCodes.NO_CONNECTION:
                 if (configuration.getListener() != null) {
