@@ -1,5 +1,8 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
+import javax.inject.Singleton;
+
+@Singleton
 public final class ApiConfiguration {
 
     public interface ApiConfigurationListener {
@@ -15,6 +18,13 @@ public final class ApiConfiguration {
     private ApiConfigurationListener mListener;
 
     private static ApiConfiguration sInstance;
+
+    public ApiConfiguration(String apiUrl, String fileServerUrl, String lang, String appType) {
+        mApiURL = apiUrl;
+        mFileServerURL = fileServerUrl;
+        mLanguage = lang;
+        mAppType = appType;
+    }
 
     public static void setupInstance(String apiUrl, String fileServerUrl,
                               String lang, String appType) {

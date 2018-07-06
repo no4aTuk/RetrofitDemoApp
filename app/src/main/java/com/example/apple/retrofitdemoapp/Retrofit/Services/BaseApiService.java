@@ -1,30 +1,50 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services;
 
-import com.example.apple.retrofitdemoapp.Exceptions.NoConnectionException;
 import com.example.apple.retrofitdemoapp.Constants.ErrorCodes;
+import com.example.apple.retrofitdemoapp.Exceptions.NoConnectionException;
 import com.example.apple.retrofitdemoapp.Models.BackendError;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
-import com.example.apple.retrofitdemoapp.Retrofit.Configuration.RetrofitBuilder;
+import com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers.ApiResultHandler;
+import com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers.ResponseException;
+import com.example.apple.retrofitdemoapp.profileData.ProfileDataEntity;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class BaseApiService {
+public abstract class BaseApiService<C> {
 
-    private final static ApiConfiguration configuration = ApiConfiguration.getInstance();
-    private final static CredentialsStorage credentialsStorage = CredentialsStorage.getInstance();
+    protected final Retrofit mRetrofit;
+    protected final ApiConfiguration mConfiguration;
+    protected final CredentialsStorage mCredentialsStorage;
+    private Class<C> mServiceClass;
+    private C mServiceInstance;
 
-    protected static Retrofit sRetrofit = RetrofitBuilder.getsInstance(configuration, credentialsStorage);
+    public BaseApiService(Retrofit mRetrofit, ApiConfiguration configuration, CredentialsStorage credentialsStorage, Class<C> serviceClass) {
+        this.mRetrofit = mRetrofit;
+        this.mConfiguration = configuration;
+        this.mCredentialsStorage = credentialsStorage;
+        this.mServiceClass = serviceClass;
+        initService();
+    }
 
-    protected static <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
+    private void initService() {
+        mServiceInstance = mRetrofit.create(mServiceClass);
+    }
+
+    protected C getService() {
+        return mServiceInstance;
+    }
+
+    protected <T> void proceedAsync(Call<T> request, final OnRequestComplete<T> callback) {
         request.enqueue(new Callback<T>() {
             @Override
             public void onResponse(Call<T> call, Response<T> response) {
@@ -38,7 +58,12 @@ public class BaseApiService {
         });
     }
 
-    protected static <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
+    protected <T> Observable<T> validate(Observable<Response<T>> observable) {
+        return observable
+                .flatMap(this::handleResponse);
+    }
+
+    protected <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
         try {
             Response<T> response = request.execute();
             handleSuccessResult(response, callback);
@@ -47,7 +72,7 @@ public class BaseApiService {
         }
     }
 
-    private static <T> void handleSuccessResult(Response<T> response, OnRequestComplete<T> callback) {
+    private <T> void handleSuccessResult(Response<T> response, OnRequestComplete<T> callback) {
         if (response.isSuccessful() && callback != null) {
             callback.onSuccess(response.body());
         } else if (callback != null) {
@@ -55,9 +80,21 @@ public class BaseApiService {
         }
     }
 
-    private static <T> void handleFailResult(Throwable t, OnRequestComplete<T> callback) {
+    private <T> Observable<T> handleResponse(Response<T> response) {
+        if (!response.isSuccessful() || response.body() == null) {
+            return Observable.error(new ResponseException(getServerError(response.code(), response)));
+        } else {
+            return Observable.just(response.body());
+        }
+    }
+
+    private <T> void handleFailResult(Throwable t, OnRequestComplete<T> callback) {
         if (callback == null) return;
 
+        callback.onFail(getServerError(t));
+    }
+
+    public static ErrorResult getServerError(Throwable t) {
         String message = t.getLocalizedMessage();
         int statusCode;
         if (t instanceof NoConnectionException) {
@@ -65,14 +102,11 @@ public class BaseApiService {
         } else {
             statusCode = ErrorCodes.SERVER_UNAVAILABLE;
         }
-        if (configuration.getListener() != null) {
-            message = configuration.getListener().getLocalizedError(statusCode);
-        }
 
-        callback.onFail(new ErrorResult(statusCode, message));
+        return new ErrorResult(statusCode, message);
     }
 
-    private static ErrorResult getServerError(int code, Response response) {
+    public static ErrorResult getServerError(int code, Response response) {
 
         String errorMessage = "";
         switch (code) {
@@ -80,9 +114,9 @@ public class BaseApiService {
             case ErrorCodes.BAD_REQUEST:
             case ErrorCodes.INTERNAL_ERROR:
             case ErrorCodes.NO_CONNECTION:
-                if (configuration.getListener() != null) {
-                    return new ErrorResult(code, errorMessage);
-                }
+//                if (mConfiguration.getListener() != null) {
+//                    return new ErrorResult(code, errorMessage);
+//                }
         }
 
         if (response.errorBody() == null) {
@@ -97,7 +131,7 @@ public class BaseApiService {
             return new ErrorResult(code, errorMessage);
         } catch (com.google.gson.JsonSyntaxException ilse) {
             ilse.printStackTrace();
-        }  catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new ErrorResult(code, "");

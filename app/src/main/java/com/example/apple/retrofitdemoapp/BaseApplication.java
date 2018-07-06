@@ -1,5 +1,6 @@
 package com.example.apple.retrofitdemoapp;
 
+import android.app.Activity;
 import android.app.Application;
 import android.util.Log;
 
@@ -9,20 +10,46 @@ import com.example.apple.retrofitdemoapp.Helpers.NetworkUtils;
 import com.example.apple.retrofitdemoapp.Helpers.Preferences;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
+import com.example.apple.retrofitdemoapp.di.components.ApplicationComponent;
+import com.example.apple.retrofitdemoapp.di.components.DaggerApplicationComponent;
 
 import java.util.Locale;
 
-public class BaseApplication extends Application implements ApiConfiguration.ApiConfigurationListener {
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
+
+public class BaseApplication extends Application implements ApiConfiguration.ApiConfigurationListener,
+        HasActivityInjector {
+
+    private static ApplicationComponent applicationComponent;
+
+    @Inject
+    DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         //Configure api
-        ApiConfiguration.setupInstance(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
-                getAppLanguage(), ApiConstants.APP_TYPE);
-        ApiConfiguration.getInstance().setListener(this);
+//        ApiConfiguration.setupInstance(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
+//                getAppLanguage(), ApiConstants.APP_TYPE);
+//        ApiConfiguration.getInstance().setListener(this);
         initUserCredentials();
+        if (applicationComponent == null) {
+            ApiConfiguration configuration = new ApiConfiguration(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
+                    getAppLanguage(), ApiConstants.APP_TYPE);
+            configuration.setListener(this);
+            applicationComponent = DaggerApplicationComponent.builder()
+                    .context(this)
+                    .api(configuration)
+                    .storage(new CredentialsStorage(this))
+                    .build();
+            applicationComponent.inject(this);
+
+        }
     }
 
     private String getAppLanguage() {
@@ -59,5 +86,14 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
     @Override
     public boolean isNetWorkAvailable() {
         return NetworkUtils.hasInternetConnection(this, true);
+    }
+
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return dispatchingAndroidInjector;
+    }
+
+    public static ApplicationComponent getAppComponent() {
+        return applicationComponent;
     }
 }

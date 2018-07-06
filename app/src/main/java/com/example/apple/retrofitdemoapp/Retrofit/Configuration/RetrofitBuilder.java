@@ -1,5 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
+import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
+import com.example.apple.retrofitdemoapp.Retrofit.Services.ServiceHolder;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnFileRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.AuthInterceptorSync;
 import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.FileDownloadProgressInterceptor;
@@ -8,31 +10,22 @@ import com.example.apple.retrofitdemoapp.Retrofit.Interceptors.NetworkConnection
 import com.example.apple.retrofitdemoapp.Retrofit.Services.FileService.FileService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import java.io.File;
-import java.util.Dictionary;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitBuilder {
 
-    private static Retrofit sInstance;
     private static final int DEFAULT_TIMEOUT = 10; // seconds
     private static final int READ_WRITE_TIMEOUT = 5; //minutes
 
-    public static Retrofit getsInstance(ApiConfiguration configuration, CredentialsStorage storage) {
-        if (sInstance == null) {
-            sInstance = createInstance(configuration, storage);
-        }
-        return sInstance;
-    }
-
-    private static Retrofit createInstance(final ApiConfiguration configuration, CredentialsStorage credentialsStorage) {
+    public static Retrofit createInstance(final ApiConfiguration configuration, CredentialsStorage storage, ServiceHolder<AuthService> serviceHolder) {
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
@@ -46,7 +39,7 @@ public class RetrofitBuilder {
                     }
                 })
                 .addInterceptor(new HeadersInterceptor(configuration))
-                .addInterceptor(new AuthInterceptorSync(credentialsStorage, configuration))
+                .addInterceptor(new AuthInterceptorSync(storage, configuration, serviceHolder))
                 .addNetworkInterceptor(new FileDownloadProgressInterceptor() {
                     @Override
                     public Map<String, OnFileRequestComplete<File>> downloadProgressListeners() {
@@ -58,6 +51,7 @@ public class RetrofitBuilder {
         return new Retrofit.Builder()
                 .baseUrl(configuration.getApiURL())
                 .addConverterFactory(GsonConverterFactory.create(getGson()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)
                 .build();
     }

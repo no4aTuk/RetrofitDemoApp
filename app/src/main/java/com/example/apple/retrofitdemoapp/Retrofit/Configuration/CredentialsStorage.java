@@ -6,13 +6,23 @@ import com.example.apple.retrofitdemoapp.Helpers.Preferences;
 
 import java.lang.ref.WeakReference;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class CredentialsStorage {
 
     private String mToken;
     private String mRefreshToken;
     private WeakReference<Context> mContext;
 
-    private CredentialsStorage() {}
+    private Context context;
+
+    public CredentialsStorage() {}
+
+    public CredentialsStorage(Context context) {
+        this.context = context;
+    }
 
     private static CredentialsStorage sInstance;
 
@@ -25,6 +35,11 @@ public class CredentialsStorage {
         sInstance.mContext = new WeakReference<>(context.getApplicationContext());
         sInstance.mToken = accessToken;
         sInstance.mRefreshToken = refreshToken;
+    }
+
+    public void setup(String accessToken, String refreshToken) {
+        setToken(accessToken);
+        setRefreshToken(refreshToken);
     }
 
     public static CredentialsStorage getInstance() {
@@ -41,15 +56,15 @@ public class CredentialsStorage {
 
     public void setToken(String accessToken) {
         mToken = accessToken;
-        if (mContext != null) {
-            Preferences.setToken(mContext.get(), accessToken);
+        if (context != null) {
+            Preferences.setToken(context, accessToken);
         }
     }
 
     public void setRefreshToken(String refreshToken) {
         mRefreshToken = refreshToken;
-        if (mContext != null) {
-            Preferences.setRefreshToken(mContext.get(), refreshToken);
+        if (context != null) {
+            Preferences.setRefreshToken(context, refreshToken);
         }
     }
 }

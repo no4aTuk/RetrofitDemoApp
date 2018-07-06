@@ -1,6 +1,7 @@
 package com.example.apple.retrofitdemoapp.Models;
 
 public class ErrorResult {
+
     private int statusCode;
     private String message;
 
@@ -15,5 +16,10 @@ public class ErrorResult {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "Error " + statusCode + ": " + message;
     }
 }
