@@ -29,4 +29,8 @@ public final class MedicalCardService extends BaseApiService<IMedicalCardService
     public Observable<MainScreenData> getMainScreenData() {
         return validate(getService().getMainScreenData());
     }
+
+    public Observable<Void> saveWeight(int weight) {
+        return validate(getService().saveWeight(weight));
+    }
 }

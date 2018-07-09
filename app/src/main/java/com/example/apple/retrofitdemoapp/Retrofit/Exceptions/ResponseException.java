@@ -1,8 +1,8 @@
-package com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers;
+package com.example.apple.retrofitdemoapp.Retrofit.Exceptions;
 
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 
-public class ResponseException extends Exception {
+public class ResponseException extends RuntimeException {
 
     public ErrorResult getErrorResult() {
         return errorResult;

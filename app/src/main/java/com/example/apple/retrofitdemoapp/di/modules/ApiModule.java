@@ -1,6 +1,5 @@
 package com.example.apple.retrofitdemoapp.di.modules;
 
-import com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers.ApiResultHandler;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService.AuthService;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.ServiceHolder;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;

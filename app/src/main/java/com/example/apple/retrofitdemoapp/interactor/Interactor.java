@@ -3,45 +3,49 @@ package com.example.apple.retrofitdemoapp.interactor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers.ApiResultHandler;
-import com.example.apple.retrofitdemoapp.profileData.BaseEntity;
-import com.example.apple.retrofitdemoapp.profileData.ProfileDataEntity;
-import com.example.apple.retrofitdemoapp.rx.DefaultSubscriber;
-
+import io.reactivex.Notification;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 
-public abstract class Interactor<T extends BaseEntity> {
+public abstract class Interactor<T> {
 
     private DisposableObserver<T> mSubscription;
-
-    protected Interactor() {
-    }
+    private Consumer<Notification<T>> mStreamHandler = notification -> {};
+    private Bundle mData;
 
     public void execute(@NonNull DisposableObserver<T> subscriber) {
-        mSubscription = this.buildObservable()
+        mSubscription =  this.buildObservable()
+                .doOnEach(getStreamHandler())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(subscriber);
     }
 
-    /**
-     * Unsubscribes from current {@link Disposable}.
-     */
     public void unsubscribe() {
         if (!mSubscription.isDisposed()) {
             mSubscription.dispose();
         }
     }
 
+    public void setStreamEventsHandler(@NonNull Consumer<Notification<T>> streamHandler) {
+        mStreamHandler = streamHandler;
+    }
+
+    protected Consumer<Notification<T>> getStreamHandler() {
+        return mStreamHandler;
+    }
+
+    public final void setData(Bundle data) {
+        mData = data;
+    }
+
+    protected final Bundle getData() {
+        return mData;
+    }
+
     protected abstract Observable<T> buildObservable();
-
-    public abstract void setParams(Bundle data);
-
-    protected abstract ApiResultHandler<T> getResultHandler();
 }

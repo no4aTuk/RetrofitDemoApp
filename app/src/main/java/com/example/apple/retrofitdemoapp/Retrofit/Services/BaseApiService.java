@@ -7,18 +7,23 @@ import com.example.apple.retrofitdemoapp.Models.ErrorResult;
 import com.example.apple.retrofitdemoapp.Retrofit.CompleteCallbacks.OnRequestComplete;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
-import com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers.ApiResultHandler;
-import com.example.apple.retrofitdemoapp.Retrofit.ResultHandlers.ResponseException;
-import com.example.apple.retrofitdemoapp.profileData.ProfileDataEntity;
+import com.example.apple.retrofitdemoapp.Retrofit.Exceptions.ResponseException;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 
+import io.reactivex.Emitter;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import rx.exceptions.Exceptions;
 
 public abstract class BaseApiService<C> {
 
@@ -60,7 +65,8 @@ public abstract class BaseApiService<C> {
 
     protected <T> Observable<T> validate(Observable<Response<T>> observable) {
         return observable
-                .flatMap(this::handleResponse);
+                .flatMap(this::handleSuccess)
+                .doOnError(this::handleError);
     }
 
     protected <T> void proceedSync(Call<T> request, final OnRequestComplete<T> callback) {
@@ -76,13 +82,13 @@ public abstract class BaseApiService<C> {
         if (response.isSuccessful() && callback != null) {
             callback.onSuccess(response.body());
         } else if (callback != null) {
-            callback.onFail(getServerError(response.code(), response));
+            callback.onFail(getServerError(response));
         }
     }
 
     private <T> Observable<T> handleResponse(Response<T> response) {
         if (!response.isSuccessful() || response.body() == null) {
-            return Observable.error(new ResponseException(getServerError(response.code(), response)));
+            return Observable.error(new ResponseException(getServerError(response)));
         } else {
             return Observable.just(response.body());
         }
@@ -92,6 +98,27 @@ public abstract class BaseApiService<C> {
         if (callback == null) return;
 
         callback.onFail(getServerError(t));
+    }
+
+    public void handleError(Throwable throwable) {
+        if (!(throwable instanceof ResponseException)) {
+            ErrorResult errorResult = getServerError(throwable);
+            throwable = new ResponseException(errorResult);
+        }
+        throw Exceptions.propagate(throwable);
+    }
+
+    public <T> Observable<T> handleSuccess(Response<T> response) {
+        if (!response.isSuccessful()) {
+            return Observable.error(new ResponseException(getServerError(response)));
+        } else {
+            T body = response.body();
+            if (body == null) {
+                return Observable.create(Emitter::onComplete);
+            } else {
+                return Observable.just(response.body());
+            }
+        }
     }
 
     public static ErrorResult getServerError(Throwable t) {
@@ -106,17 +133,14 @@ public abstract class BaseApiService<C> {
         return new ErrorResult(statusCode, message);
     }
 
-    public static ErrorResult getServerError(int code, Response response) {
+    public static ErrorResult getServerError(Response response) {
 
-        String errorMessage = "";
+        int code = response.code();
         switch (code) {
             case ErrorCodes.NOT_FOUND:
             case ErrorCodes.BAD_REQUEST:
             case ErrorCodes.INTERNAL_ERROR:
             case ErrorCodes.NO_CONNECTION:
-//                if (mConfiguration.getListener() != null) {
-//                    return new ErrorResult(code, errorMessage);
-//                }
         }
 
         if (response.errorBody() == null) {
@@ -127,7 +151,7 @@ public abstract class BaseApiService<C> {
             String jsonString;
             jsonString = response.errorBody().string();
             BackendError backendError = new Gson().fromJson(jsonString, BackendError.class);
-            errorMessage = backendError.getErrorMessage();
+            String errorMessage = backendError.getErrorMessage();
             return new ErrorResult(code, errorMessage);
         } catch (com.google.gson.JsonSyntaxException ilse) {
             ilse.printStackTrace();

@@ -8,4 +8,5 @@ public class ErrorCodes {
     public static final int INTERNAL_ERROR = 500;
     public static final int NO_CONNECTION = -1;
     public static final int SERVER_UNAVAILABLE = -2;
+    public static final int SYSTEM_ERROR = 0;
 }

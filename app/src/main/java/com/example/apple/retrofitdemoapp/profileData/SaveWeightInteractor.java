@@ -9,19 +9,20 @@ import javax.inject.Singleton;
 import io.reactivex.Observable;
 
 @Singleton
-public class ProfileDataInteractor extends Interactor<ProfileDataEntity> {
+public class SaveWeightInteractor extends Interactor<Void>{
 
     private MedicalCardService mMedicalCardService;
 
+    public static final String WEIGHT_PARAM = "WEIGHT_PARAM";
+
     @Inject
-    public ProfileDataInteractor(MedicalCardService medicalCardService) {
+    public SaveWeightInteractor(MedicalCardService medicalCardService) {
         this.mMedicalCardService = medicalCardService;
     }
 
     @Override
-    protected Observable<ProfileDataEntity> buildObservable() {
-        return mMedicalCardService.getMedicalCard()
-                .zipWith(mMedicalCardService.getMainScreenData(),
-                        ProfileDataEntity::create);
+    protected Observable<Void> buildObservable() {
+        int weight = getData().getInt(WEIGHT_PARAM);
+        return mMedicalCardService.saveWeight(weight);
     }
 }
