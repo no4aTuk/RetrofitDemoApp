@@ -7,7 +7,7 @@ import com.arellomobile.mvp.MvpView;
 import com.example.apple.retrofitdemoapp.interactor.Interactor;
 import com.example.apple.retrofitdemoapp.rx.DefaultSubscriber;
 
-public abstract class BasePresenter<T extends MvpView, K> extends MvpPresenter<T> implements Presenter {
+public abstract class BasePresenter<View extends MvpView, Entity> extends MvpPresenter<View> implements Presenter {
 
     private Bundle mInitialData;
     private boolean mIsInitialDataLoaded;
@@ -54,7 +54,7 @@ public abstract class BasePresenter<T extends MvpView, K> extends MvpPresenter<T
         getInitInteractor().unsubscribe();
     }
 
-    protected abstract Interactor<K> getInitInteractor();
+    protected abstract Interactor<Entity> getInitInteractor();
 
-    protected abstract DefaultSubscriber<K> getInitSubscriber();
+    protected abstract DefaultSubscriber<Entity> getInitSubscriber();
 }

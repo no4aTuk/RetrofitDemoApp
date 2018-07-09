@@ -11,13 +11,13 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 
-public abstract class Interactor<T> {
+public abstract class Interactor<Entity> {
 
-    private DisposableObserver<T> mSubscription;
-    private Consumer<Notification<T>> mStreamHandler = notification -> {};
+    private DisposableObserver<Entity> mSubscription;
+    private Consumer<Notification<Entity>> mStreamHandler = notification -> {};
     private Bundle mData;
 
-    public void execute(@NonNull DisposableObserver<T> subscriber) {
+    public void execute(@NonNull DisposableObserver<Entity> subscriber) {
         mSubscription =  this.buildObservable()
                 .doOnEach(getStreamHandler())
                 .subscribeOn(Schedulers.io())
@@ -31,11 +31,11 @@ public abstract class Interactor<T> {
         }
     }
 
-    public void setStreamEventsHandler(@NonNull Consumer<Notification<T>> streamHandler) {
+    public void setStreamEventsHandler(@NonNull Consumer<Notification<Entity>> streamHandler) {
         mStreamHandler = streamHandler;
     }
 
-    protected Consumer<Notification<T>> getStreamHandler() {
+    protected Consumer<Notification<Entity>> getStreamHandler() {
         return mStreamHandler;
     }
 
@@ -47,5 +47,5 @@ public abstract class Interactor<T> {
         return mData;
     }
 
-    protected abstract Observable<T> buildObservable();
+    protected abstract Observable<Entity> buildObservable();
 }
