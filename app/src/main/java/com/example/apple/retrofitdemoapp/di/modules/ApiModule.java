@@ -18,13 +18,12 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    public Retrofit retrofit(ApiConfiguration apiConfig, CredentialsStorage credentialsStorage, @Named("AuthService") ServiceHolder<AuthService> serviceHolder) {
+    public Retrofit retrofit(ApiConfiguration apiConfig, CredentialsStorage credentialsStorage, ServiceHolder<AuthService> serviceHolder) {
         return RetrofitBuilder.createInstance(apiConfig, credentialsStorage, serviceHolder);
     }
 
     @Provides
     @Singleton
-    @Named("AuthService")
     public ServiceHolder<AuthService> holder() {
         return new ServiceHolder<>();
     }

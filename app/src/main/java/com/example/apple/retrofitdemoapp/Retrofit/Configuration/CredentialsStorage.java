@@ -1,12 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
-import android.content.Context;
+import com.example.apple.retrofitdemoapp.Models.Token;
 
-import com.example.apple.retrofitdemoapp.Helpers.Preferences;
-
-import java.lang.ref.WeakReference;
-
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
@@ -14,36 +9,16 @@ public class CredentialsStorage {
 
     private String mToken;
     private String mRefreshToken;
-    private WeakReference<Context> mContext;
+    private ApiConfiguration.ApiConfigurationListener configurationListener;
 
-    private Context context;
-
-    public CredentialsStorage() {}
-
-    public CredentialsStorage(Context context) {
-        this.context = context;
+    public CredentialsStorage(ApiConfiguration.ApiConfigurationListener configurationListener) {
+        this.configurationListener = configurationListener;
     }
 
-    private static CredentialsStorage sInstance;
-
-    public static void setupInstance(Context context, String accessToken, String refreshToken) {
-
-        if (sInstance == null) {
-            sInstance = new CredentialsStorage();
-        }
-        //Just to be sure that passed single global application context
-        sInstance.mContext = new WeakReference<>(context.getApplicationContext());
-        sInstance.mToken = accessToken;
-        sInstance.mRefreshToken = refreshToken;
-    }
-
-    public void setup(String accessToken, String refreshToken) {
-        setToken(accessToken);
-        setRefreshToken(refreshToken);
-    }
-
-    public static CredentialsStorage getInstance() {
-        return  sInstance;
+    public void setup(Token token) {
+        setToken(String.format("%s %s", token.token_type, token.access_token));
+        setRefreshToken(token.refresh_token);
+        configurationListener.onTokenChanged(token);
     }
 
     public String getToken() {
@@ -56,15 +31,9 @@ public class CredentialsStorage {
 
     public void setToken(String accessToken) {
         mToken = accessToken;
-        if (context != null) {
-            Preferences.setToken(context, accessToken);
-        }
     }
 
     public void setRefreshToken(String refreshToken) {
         mRefreshToken = refreshToken;
-        if (context != null) {
-            Preferences.setRefreshToken(context, refreshToken);
-        }
     }
 }

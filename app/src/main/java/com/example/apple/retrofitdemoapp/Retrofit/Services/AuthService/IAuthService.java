@@ -5,7 +5,10 @@ import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Models.UserPermissions;
 import com.example.apple.retrofitdemoapp.Models.VerifyCode;
 
+
+import io.reactivex.Observable;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -28,6 +31,11 @@ interface IAuthService {
     @POST(rootPath + "token")
     Call<Token> token(@Field("grant_type") String grant_type, @Field("username") String userName,
                       @Field("password") String password, @Field("client_id") String clientId);
+
+    @FormUrlEncoded
+    @POST(rootPath + "token")
+    Observable<Response<Token>> getToken(@Field("grant_type") String grant_type, @Field("username") String userName,
+                                         @Field("password") String password, @Field("client_id") String clientId);
 
     @FormUrlEncoded
     @POST(rootPath + "token")

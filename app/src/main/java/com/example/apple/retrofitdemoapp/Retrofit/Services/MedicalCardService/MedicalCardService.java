@@ -1,5 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services.MedicalCardService;
 
+import android.content.Context;
+
 import com.example.apple.retrofitdemoapp.Models.MainScreenData;
 import com.example.apple.retrofitdemoapp.Models.MedicalCard;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
@@ -11,15 +13,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import retrofit2.Response;
+import io.reactivex.Single;
 import retrofit2.Retrofit;
 
 @Singleton
 public final class MedicalCardService extends BaseApiService<IMedicalCardService> {
 
     @Inject
-    public MedicalCardService(Retrofit retrofit, ApiConfiguration configuration, CredentialsStorage storage) {
-        super(retrofit, configuration, storage, IMedicalCardService.class);
+    public MedicalCardService(Context context, Retrofit retrofit, ApiConfiguration configuration, CredentialsStorage storage) {
+        super(context, retrofit, configuration, storage, IMedicalCardService.class);
     }
 
     public Observable<MedicalCard> getMedicalCard() {

@@ -11,7 +11,6 @@ import io.reactivex.observers.DisposableObserver;
 
 import static com.example.apple.retrofitdemoapp.Constants.ErrorCodes.SYSTEM_ERROR;
 
-
 public class DefaultSubscriber<T> extends DisposableObserver<T> {
 
     private OnRequestComplete<T> mCallback;
@@ -30,10 +29,9 @@ public class DefaultSubscriber<T> extends DisposableObserver<T> {
             result = ((ResponseException) exception).getErrorResult();
         } else {
             exception.printStackTrace();
-            result = new ErrorResult(SYSTEM_ERROR, exception.getLocalizedMessage());
+            result = ErrorResult.EMPTY;
         }
         mCallback.onFail(result);
-        mCallback.onComplete();
     }
 
     @Override public void onNext(T result) {

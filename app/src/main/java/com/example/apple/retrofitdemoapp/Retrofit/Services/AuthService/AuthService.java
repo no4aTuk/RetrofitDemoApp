@@ -1,5 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Services.AuthService;
 
+import android.content.Context;
+
 import com.example.apple.retrofitdemoapp.Constants.ApiConstants;
 import com.example.apple.retrofitdemoapp.Retrofit.Services.ServiceHolder;
 import com.example.apple.retrofitdemoapp.Models.ErrorResult;
@@ -15,6 +17,8 @@ import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -23,32 +27,16 @@ import retrofit2.Retrofit;
 public final class AuthService extends BaseApiService<IAuthService> {
 
     @Inject
-    public AuthService(Retrofit retrofit, CredentialsStorage storage, ApiConfiguration configuration, ServiceHolder<AuthService> serviceHolder) {
-        super(retrofit, configuration, storage, IAuthService.class);
+    public AuthService(Context context, Retrofit retrofit, CredentialsStorage storage,
+                       ApiConfiguration configuration, ServiceHolder<AuthService> serviceHolder) {
+        super(context, retrofit, configuration, storage, IAuthService.class);
         serviceHolder.setService(this);
     }
 
-    public void token(String userName, String password, final OnRequestComplete<Token> completeCallback) {
-        Call<Token> tokenRequest = getService().token(ApiConstants.GRANT_TYPE_PASSWORD, userName,
-                password, ApiConstants.CLIENT_ID);
-
-        proceedAsync(tokenRequest, new OnRequestComplete<Token>() {
-            @Override
-            public void onSuccess(Token result) {
-                if (result == null) {
-                    completeCallback.onFail(null);
-                    return;
-                }
-
-                updateAccessToken(result);
-                completeCallback.onSuccess(result);
-            }
-
-            @Override
-            public void onFail(ErrorResult error) {
-                completeCallback.onFail(error);
-            }
-        });
+    public Observable<Token> getToken(String userName, String password) {
+        return validate(getService().getToken(ApiConstants.GRANT_TYPE_PASSWORD, userName,
+                password, ApiConstants.CLIENT_ID))
+                .doOnNext(this::updateAccessToken);
     }
 
     public int refreshToken() {
@@ -71,13 +59,7 @@ public final class AuthService extends BaseApiService<IAuthService> {
         return statusCode;
     }
 
-    public void userPermissions(OnRequestComplete<UserPermissions> completeCallback) {
-        Call<UserPermissions> permissionRequest = getService().userPermissions();
-        proceedAsync(permissionRequest, completeCallback);
-    }
-
-    private void updateAccessToken(Token token) {
-        mCredentialsStorage.setToken(String.format("%s %s", token.token_type, token.access_token));
-        mCredentialsStorage.setRefreshToken(token.refresh_token);
+    public void updateAccessToken(Token token) {
+        mCredentialsStorage.setup(token);
     }
 }

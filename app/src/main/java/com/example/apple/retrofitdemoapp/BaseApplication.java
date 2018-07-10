@@ -8,6 +8,7 @@ import com.example.apple.retrofitdemoapp.Constants.ApiConstants;
 import com.example.apple.retrofitdemoapp.Helpers.ApiErrorHelper;
 import com.example.apple.retrofitdemoapp.Helpers.NetworkUtils;
 import com.example.apple.retrofitdemoapp.Helpers.Preferences;
+import com.example.apple.retrofitdemoapp.Models.Token;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration;
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.di.components.ApplicationComponent;
@@ -24,7 +25,7 @@ import dagger.android.HasActivityInjector;
 public class BaseApplication extends Application implements ApiConfiguration.ApiConfigurationListener,
         HasActivityInjector {
 
-    private static ApplicationComponent applicationComponent;
+    private ApplicationComponent applicationComponent;
 
     @Inject
     DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
@@ -33,22 +34,19 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
     public void onCreate() {
         super.onCreate();
 
-        //Configure api
-//        ApiConfiguration.setupInstance(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
-//                getAppLanguage(), ApiConstants.APP_TYPE);
-//        ApiConfiguration.getInstance().setListener(this);
-        initUserCredentials();
         if (applicationComponent == null) {
             ApiConfiguration configuration = new ApiConfiguration(ApiConstants.BASE_API_URL, ApiConstants.FILE_SERVER_API_URL,
                     getAppLanguage(), ApiConstants.APP_TYPE);
             configuration.setListener(this);
+            CredentialsStorage credentialsStorage = new CredentialsStorage(this);
+            credentialsStorage.setToken(Preferences.getToken(getApplicationContext()));
+            credentialsStorage.setRefreshToken(Preferences.getRefreshToken(getApplicationContext()));
             applicationComponent = DaggerApplicationComponent.builder()
                     .context(this)
                     .api(configuration)
-                    .storage(new CredentialsStorage(this))
+                    .storage(credentialsStorage)
                     .build();
             applicationComponent.inject(this);
-
         }
     }
 
@@ -61,12 +59,6 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
         } else {
             return ApiConstants.APP_LANGUAGE_RU;
         }
-    }
-
-    private void initUserCredentials() {
-        String token = Preferences.getToken(getApplicationContext());
-        String refreshToken = Preferences.getRefreshToken(getApplicationContext());
-        CredentialsStorage.setupInstance(getApplicationContext(), token, refreshToken);
     }
 
     //-------------------------------------------
@@ -89,11 +81,13 @@ public class BaseApplication extends Application implements ApiConfiguration.Api
     }
 
     @Override
-    public AndroidInjector<Activity> activityInjector() {
-        return dispatchingAndroidInjector;
+    public void onTokenChanged(Token token) {
+        Preferences.setToken(this, token.access_token);
+        Preferences.setRefreshToken(this, token.refresh_token);
     }
 
-    public static ApplicationComponent getAppComponent() {
-        return applicationComponent;
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return dispatchingAndroidInjector;
     }
 }

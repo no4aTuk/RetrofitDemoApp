@@ -1,7 +1,6 @@
-package com.example.apple.retrofitdemoapp.profileData;
+package com.example.apple.retrofitdemoapp.profileData.fragment;
 
 import android.content.Context;
-import android.os.Bundle;
 
 import com.arellomobile.mvp.InjectViewState;
 import com.example.apple.retrofitdemoapp.BaseApplication;
@@ -12,38 +11,16 @@ import com.example.apple.retrofitdemoapp.rx.DefaultSubscriber;
 
 import javax.inject.Inject;
 
-import static com.example.apple.retrofitdemoapp.profileData.SaveWeightInteractor.WEIGHT_PARAM;
-
 @InjectViewState
 public class ProfileDataPresenter extends BasePresenter<ProfileDataView, ProfileDataEntity> {
 
-    @Inject
     protected ProfileDataInteractor interactor;
-    @Inject
-    protected SaveWeightInteractor saveWeightInteractor;
-    @Inject
     protected Context context;
 
-    public ProfileDataPresenter() {
-        BaseApplication.getAppComponent().inject(this);
-    }
-
-    public void setWeight(int weight) {
-        Bundle data = new Bundle();
-        data.putInt(WEIGHT_PARAM, weight);
-        saveWeightInteractor.setData(data);
-        saveWeightInteractor.execute(new DefaultSubscriber<>(
-                new OnRequestComplete<Void>() {
-                    @Override
-                    public void onComplete() {
-                        getViewState().weightSaved();
-                    }
-
-                    @Override
-                    public void onFail(ErrorResult error) {
-                        getViewState().showError(error.getMessage());
-                    }
-                }));
+    @Inject
+    public ProfileDataPresenter(Context context, ProfileDataInteractor interactor) {
+        this.context = context;
+        this.interactor = interactor;
     }
 
     @Override

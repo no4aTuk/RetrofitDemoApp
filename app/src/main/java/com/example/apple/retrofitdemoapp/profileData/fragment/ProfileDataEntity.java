@@ -1,4 +1,4 @@
-package com.example.apple.retrofitdemoapp.profileData;
+package com.example.apple.retrofitdemoapp.profileData.fragment;
 
 import com.example.apple.retrofitdemoapp.Models.MainScreenData;
 import com.example.apple.retrofitdemoapp.Models.MedicalCard;

@@ -1,11 +1,13 @@
 package com.example.apple.retrofitdemoapp.presenter;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
 import com.arellomobile.mvp.MvpPresenter;
 import com.arellomobile.mvp.MvpView;
 import com.example.apple.retrofitdemoapp.interactor.Interactor;
 import com.example.apple.retrofitdemoapp.rx.DefaultSubscriber;
+import com.example.apple.retrofitdemoapp.utils.ObjectUtils;
 
 public abstract class BasePresenter<View extends MvpView, Entity> extends MvpPresenter<View> implements Presenter {
 
@@ -13,7 +15,7 @@ public abstract class BasePresenter<View extends MvpView, Entity> extends MvpPre
     private boolean mIsInitialDataLoaded;
 
     public void setInitialData(Bundle data) {
-        if (data != null && (mInitialData == null || !mInitialData.equals(data))) {
+        if (data != null && (mInitialData == null || !ObjectUtils.equalBundles(mInitialData, data))) {
             this.mInitialData = data;
             this.mIsInitialDataLoaded = false;
             if (getInitInteractor() != null) {
@@ -24,6 +26,9 @@ public abstract class BasePresenter<View extends MvpView, Entity> extends MvpPre
 
     @Override
     protected void onFirstViewAttach() {
+        if (getInitInteractor() == null) {
+            return;
+        }
         getInitInteractor().setData(mInitialData);
         getInitInteractor().setStreamEventsHandler(notification -> {
             if (notification.isOnNext()) {
@@ -34,6 +39,9 @@ public abstract class BasePresenter<View extends MvpView, Entity> extends MvpPre
     }
 
     public void loadInitialData() {
+        if (getInitInteractor() == null || getInitSubscriber() == null) {
+            return;
+        }
         getInitInteractor().execute(getInitSubscriber());
     }
 
@@ -51,10 +59,15 @@ public abstract class BasePresenter<View extends MvpView, Entity> extends MvpPre
 
     @Override
     public void destroy() {
+        if (getInitInteractor() == null) {
+            return;
+        }
         getInitInteractor().unsubscribe();
     }
 
+    @Nullable
     protected abstract Interactor<Entity> getInitInteractor();
 
+    @Nullable
     protected abstract DefaultSubscriber<Entity> getInitSubscriber();
 }

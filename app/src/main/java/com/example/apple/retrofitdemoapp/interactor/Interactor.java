@@ -10,16 +10,21 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
-
 public abstract class Interactor<Entity> {
 
     private DisposableObserver<Entity> mSubscription;
     private Consumer<Notification<Entity>> mStreamHandler = notification -> {};
     private Bundle mData;
+    private boolean mIsInProcess;
 
     public void execute(@NonNull DisposableObserver<Entity> subscriber) {
-        mSubscription =  this.buildObservable()
+        if (mIsInProcess) {
+            return;
+        }
+        mIsInProcess = true;
+        mSubscription = this.buildObservable()
                 .doOnEach(getStreamHandler())
+                .doOnTerminate(() -> mIsInProcess = false)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(subscriber);

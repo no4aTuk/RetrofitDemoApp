@@ -1,5 +1,7 @@
 package com.example.apple.retrofitdemoapp.Retrofit.Configuration;
 
+import com.example.apple.retrofitdemoapp.Models.Token;
+
 import javax.inject.Singleton;
 
 @Singleton
@@ -7,8 +9,12 @@ public final class ApiConfiguration {
 
     public interface ApiConfigurationListener {
         void OnTokenExpired();
+
         String getLocalizedError(int statusCode);
+
         boolean isNetWorkAvailable();
+
+        void onTokenChanged(Token token);
     }
 
     private String mApiURL;
@@ -17,33 +23,12 @@ public final class ApiConfiguration {
     private String mAppType;
     private ApiConfigurationListener mListener;
 
-    private static ApiConfiguration sInstance;
-
     public ApiConfiguration(String apiUrl, String fileServerUrl, String lang, String appType) {
         mApiURL = apiUrl;
         mFileServerURL = fileServerUrl;
         mLanguage = lang;
         mAppType = appType;
     }
-
-    public static void setupInstance(String apiUrl, String fileServerUrl,
-                              String lang, String appType) {
-
-        if (sInstance == null) {
-            sInstance = new ApiConfiguration();
-        }
-        sInstance.mApiURL = apiUrl;
-        sInstance.mFileServerURL = fileServerUrl;
-        sInstance.mLanguage = lang;
-        sInstance.mAppType = appType;
-    }
-
-    public static ApiConfiguration getInstance() {
-        return  sInstance;
-    }
-
-    private ApiConfiguration() { }
-
 
     public String getApiURL() {
         return mApiURL;

@@ -7,7 +7,6 @@ import com.example.apple.retrofitdemoapp.Retrofit.Configuration.ApiConfiguration
 import com.example.apple.retrofitdemoapp.Retrofit.Configuration.CredentialsStorage;
 import com.example.apple.retrofitdemoapp.di.modules.ApiModule;
 import com.example.apple.retrofitdemoapp.di.modules.ApplicationModule;
-import com.example.apple.retrofitdemoapp.profileData.ProfileDataPresenter;
 
 import javax.inject.Singleton;
 
@@ -33,6 +32,4 @@ public interface ApplicationComponent {
     }
 
     void inject(BaseApplication application);
-
-    void inject(ProfileDataPresenter presenter);
 }

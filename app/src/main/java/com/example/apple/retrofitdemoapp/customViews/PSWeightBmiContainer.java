@@ -20,11 +20,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.arellomobile.mvp.MvpDelegate;
-import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.example.apple.retrofitdemoapp.R;
+import com.example.apple.retrofitdemoapp.profileData.dialog.WeightDialog;
 import com.example.apple.retrofitdemoapp.view.CustomMvpView;
-import com.example.apple.retrofitdemoapp.view.WeightBmiPresenter;
-import com.example.apple.retrofitdemoapp.view.WeightBmiView;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +31,7 @@ import java.util.regex.Pattern;
  * Created by lavrik on 13.07.2017.
  */
 
-public class PSWeightBmiContainer extends LinearLayout implements WeightBmiView, CustomMvpView {
+public class PSWeightBmiContainer extends LinearLayout implements CustomMvpView {
 
     //region Private fields
     private EditText mEtWeight;
@@ -49,10 +47,8 @@ public class PSWeightBmiContainer extends LinearLayout implements WeightBmiView,
     private int mHeight;
     private float minValue = 2;
     private float maxValue = 300;
-    private PSPickerDialog mDialogContainer;
+    private WeightDialog mDialogContainer;
 
-    @InjectPresenter
-    WeightBmiPresenter presenter;
     private MvpDelegate<PSWeightBmiContainer> mMvpDelegate;
     private MvpDelegate mParentDelegate;
     //endregion
@@ -74,7 +70,7 @@ public class PSWeightBmiContainer extends LinearLayout implements WeightBmiView,
 
     //region Public methods
 
-    public void setDialogContainer(final PSPickerDialog dialog) {
+    public void setDialogContainer(final WeightDialog dialog) {
         mDialogContainer = dialog;
     }
 
@@ -115,10 +111,6 @@ public class PSWeightBmiContainer extends LinearLayout implements WeightBmiView,
     public void addTextWatcher(TextWatcher textWatcher) {
         mEtWeight.addTextChangedListener(textWatcher);
     }
-
-//    public void setDialogContainer(final PSPickerDialog dialog) {
-//        mDialogContainer = dialog;
-//    }
 
     @Override
     protected void onDetachedFromWindow() {
@@ -285,11 +277,6 @@ public class PSWeightBmiContainer extends LinearLayout implements WeightBmiView,
 //        int maxWeight = PSHealthUtils.getMaxWeight(mHeight);
 
 //        mNormalWeightTv.setText(getContext().getString(R.string.activity_profile_normal_weight, minWeight, maxWeight));
-    }
-
-    @Override
-    public void setState(int state) {
-
     }
     //endregion
 
